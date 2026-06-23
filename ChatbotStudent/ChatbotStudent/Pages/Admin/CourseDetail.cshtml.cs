@@ -1,23 +1,21 @@
-using ChatbotStudent.Data;
-using ChatbotStudent.Models;
-using ChatbotStudent.Services;
+using ChatbotStudent.Data.Models;
+using ChatbotStudent.Business.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 
-namespace ChatbotStudent.Pages.Admin;
+namespace ChatbotStudent.Web.Pages.Admin;
 
 [Authorize(Roles = "Admin")]
 public class CourseDetailModel : PageModel
 {
-    private readonly AppDbContext _db;
+    private readonly ICourseService _courseService;
     private readonly IUserService _userService;
     private readonly ILogger<CourseDetailModel> _logger;
 
-    public CourseDetailModel(AppDbContext db, IUserService userService, ILogger<CourseDetailModel> logger)
+    public CourseDetailModel(ICourseService courseService, IUserService userService, ILogger<CourseDetailModel> logger)
     {
-        _db = db;
+        _courseService = courseService;
         _userService = userService;
         _logger = logger;
     }
@@ -29,20 +27,12 @@ public class CourseDetailModel : PageModel
 
     public async Task OnGetAsync(int courseId)
     {
-        Course = await _db.Courses
-            .Include(c => c.Documents)
-            .Include(c => c.ChatSessions)
-            .Include(c => c.Enrollments)
-            .FirstOrDefaultAsync(c => c.Id == courseId);
+        Course = await _courseService.GetCourseDetailAsync(courseId);
 
         if (Course == null) return;
 
-        var enrolledIds = await _db.CourseEnrollments
-            .Where(e => e.CourseId == courseId)
-            .Select(e => e.UserId)
-            .ToListAsync();
-
         Students = await _userService.GetUsersByRoleAsync(UserRole.Student);
+        var enrolledIds = Course.Enrollments.Select(e => e.UserId).ToList();
         Students = Students.Where(s => enrolledIds.Contains(s.Id)).ToList();
 
         AvailableStudents = await _userService.GetStudentsNotEnrolledAsync(courseId);

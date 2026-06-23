@@ -1,5 +1,5 @@
 @page
-@model ChatbotStudent.Pages.Admin.UsersModel
+@model ChatbotStudent.Web.Pages.Admin.UsersModel
 @{
     ViewData["Title"] = "Quản lý người dùng";
     var pendingCount = Model.PendingUsers.Count;
@@ -39,19 +39,19 @@
         </div>
         <div class="col-md-3">
             <div class="stat-card card green">
-                <div class="stat-value text-success">@Model.Users.Count(u => u.Role == ChatbotStudent.Models.UserRole.Admin)</div>
+                <div class="stat-value text-success">@Model.Users.Count(u => u.Role == ChatbotStudent.Data.Models.UserRole.Admin)</div>
                 <div class="stat-label">Admin</div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card card blue">
-                <div class="stat-value text-info">@Model.Users.Count(u => u.Role == ChatbotStudent.Models.UserRole.Lecturer)</div>
+                <div class="stat-value text-info">@Model.Users.Count(u => u.Role == ChatbotStudent.Data.Models.UserRole.Lecturer)</div>
                 <div class="stat-label">Giảng viên</div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card card amber">
-                <div class="stat-value" style="color:var(--accent)">@Model.Users.Count(u => u.Role == ChatbotStudent.Models.UserRole.Student)</div>
+                <div class="stat-value" style="color:var(--accent)">@Model.Users.Count(u => u.Role == ChatbotStudent.Data.Models.UserRole.Student)</div>
                 <div class="stat-label">Sinh viên</div>
             </div>
         </div>
@@ -191,21 +191,21 @@
                             var user = Model.Users[i];
                             var roleBadge = user.Role switch
                             {
-                                ChatbotStudent.Models.UserRole.Admin => "danger",
-                                ChatbotStudent.Models.UserRole.Lecturer => "success",
-                                ChatbotStudent.Models.UserRole.Student => "primary",
+                                ChatbotStudent.Data.Models.UserRole.Admin => "danger",
+                                ChatbotStudent.Data.Models.UserRole.Lecturer => "success",
+                                ChatbotStudent.Data.Models.UserRole.Student => "primary",
                                 _ => "secondary"
                             };
                             var approvalBadge = user.ApprovalStatus switch
                             {
-                                ChatbotStudent.Models.ApprovalStatus.Pending => "warning",
-                                ChatbotStudent.Models.ApprovalStatus.Rejected => "danger",
+                                ChatbotStudent.Data.Models.ApprovalStatus.Pending => "warning",
+                                ChatbotStudent.Data.Models.ApprovalStatus.Rejected => "danger",
                                 _ => "success"
                             };
                             var approvalText = user.ApprovalStatus switch
                             {
-                                ChatbotStudent.Models.ApprovalStatus.Pending => "Chờ duyệt",
-                                ChatbotStudent.Models.ApprovalStatus.Rejected => "Từ chối",
+                                ChatbotStudent.Data.Models.ApprovalStatus.Pending => "Chờ duyệt",
+                                ChatbotStudent.Data.Models.ApprovalStatus.Rejected => "Từ chối",
                                 _ => "✓ Đã duyệt"
                             };
                             <tr>
@@ -239,7 +239,7 @@
                                 </td>
                                 <td>
                                     <span class="badge bg-@approvalBadge">@approvalText</span>
-                                    @if (user.ApprovalStatus == ChatbotStudent.Models.ApprovalStatus.Rejected && !string.IsNullOrEmpty(user.RejectionReason))
+                                    @if (user.ApprovalStatus == ChatbotStudent.Data.Models.ApprovalStatus.Rejected && !string.IsNullOrEmpty(user.RejectionReason))
                                     {
                                         <br /><span class="text-danger small" title="@user.RejectionReason">@user.RejectionReason</span>
                                     }
@@ -271,7 +271,7 @@
                                                     <i class="bi bi-shuffle me-1"></i> Đổi vai trò
                                                 </button>
                                             </li>
-                                            @if (user.ApprovalStatus == ChatbotStudent.Models.ApprovalStatus.Rejected)
+                                            @if (user.ApprovalStatus == ChatbotStudent.Data.Models.ApprovalStatus.Rejected)
                                             {
                                                 <li>
                                                     <form method="post" asp-page-handler="Approve">
@@ -282,7 +282,7 @@
                                                     </form>
                                                 </li>
                                             }
-                                            @if (user.Role == ChatbotStudent.Models.UserRole.Student)
+                                            @if (user.Role == ChatbotStudent.Data.Models.UserRole.Student)
                                             {
                                                 <li>
                                                     <a class="dropdown-item" href="/Admin/Courses?userId=@user.Id">

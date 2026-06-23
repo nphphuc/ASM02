@@ -1,10 +1,10 @@
 using System.Text.Json;
-using ChatbotStudent.Models;
-using ChatbotStudent.Services;
+using ChatbotStudent.Data.Models;
+using ChatbotStudent.Business.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
-namespace ChatbotStudent.Hubs;
+namespace ChatbotStudent.Web.Hubs;
 
 [Authorize]
 public class ChatHub : Hub

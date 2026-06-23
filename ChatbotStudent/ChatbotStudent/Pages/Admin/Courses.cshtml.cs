@@ -1,55 +1,38 @@
-using ChatbotStudent.Data;
-using ChatbotStudent.Models;
-using ChatbotStudent.Services;
+using ChatbotStudent.Data.Models;
+using ChatbotStudent.Business.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 
-namespace ChatbotStudent.Pages.Admin;
+namespace ChatbotStudent.Web.Pages.Admin;
 
 [Authorize(Roles = "Admin")]
 public class CoursesModel : PageModel
 {
-    private readonly AppDbContext _db;
+    private readonly ICourseService _courseService;
     private readonly IUserService _userService;
     private readonly ILogger<CoursesModel> _logger;
 
-    public CoursesModel(AppDbContext db, IUserService userService, ILogger<CoursesModel> logger)
+    public CoursesModel(ICourseService courseService, IUserService userService, ILogger<CoursesModel> logger)
     {
-        _db = db;
+        _courseService = courseService;
         _userService = userService;
         _logger = logger;
     }
 
-    public List<Models.Course> Courses { get; set; } = new();
+    public List<Course> Courses { get; set; } = new();
     public List<User> Lecturers { get; set; } = new();
     public string? SuccessMessage { get; set; }
 
     public async Task OnGetAsync()
     {
-        Courses = await _db.Courses
-            .Include(c => c.Enrollments)
-            .Include(c => c.Documents)
-            .OrderBy(c => c.Name)
-            .ToListAsync();
-
+        Courses = await _courseService.GetAllCoursesAsync();
         Lecturers = await _userService.GetUsersByRoleAsync(UserRole.Lecturer);
     }
 
     public async Task<IActionResult> OnPostCreateCourseAsync(string name, string? code, string? description, int? lecturerId)
     {
-        var course = new Models.Course
-        {
-            Name = name.Trim(),
-            Code = code?.Trim(),
-            Description = description,
-            LecturerId = lecturerId,
-            CreatedAt = DateTime.UtcNow
-        };
-
-        _db.Courses.Add(course);
-        await _db.SaveChangesAsync();
+        var course = await _courseService.CreateCourseAsync(name, code, description, lecturerId);
 
         // If lecturer specified, enroll them too
         if (lecturerId.HasValue)
@@ -63,12 +46,11 @@ public class CoursesModel : PageModel
 
     public async Task<IActionResult> OnPostDeleteCourseAsync(int courseId)
     {
-        var course = await _db.Courses.FindAsync(courseId);
-        if (course != null)
+        var success = await _courseService.DeleteCourseAsync(courseId);
+        if (success)
         {
-            _db.Courses.Remove(course);
-            await _db.SaveChangesAsync();
-            SuccessMessage = $"Đã xóa môn học {course.Name}.";
+            var course = await _courseService.GetCourseByIdAsync(courseId);
+            SuccessMessage = $"Đã xóa môn học.";
         }
         return RedirectToPage();
     }

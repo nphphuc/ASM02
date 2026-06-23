@@ -1,7 +1,7 @@
 using ChatbotStudent.Data;
-using ChatbotStudent.Hubs;
-using ChatbotStudent.Models;
-using ChatbotStudent.Services;
+using ChatbotStudent.Data.Models;
+using ChatbotStudent.Business.Services;
+using ChatbotStudent.Web.Hubs;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
@@ -9,10 +9,28 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ── Load .env file for sensitive configuration ──────────
+// Values from .env override appsettings.json
+// .env is gitignored - NEVER commit it to version control
+var envPath = Path.Combine(builder.Environment.ContentRootPath, "..", ".env");
+if (File.Exists(envPath))
+{
+    DotNetEnv.Env.Load(envPath);
+}
+else
+{
+    var localEnvPath = Path.Combine(builder.Environment.ContentRootPath, ".env");
+    if (File.Exists(localEnvPath))
+    {
+        DotNetEnv.Env.Load(localEnvPath);
+    }
+}
+
 // ── Database ──────────────────────────────────────────────────────────
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
+        Environment.GetEnvironmentVariable("DB_CONNECTION_STRING")
+            ?? builder.Configuration.GetConnectionString("DefaultConnection"),
         sql =>
         {
             sql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null);
@@ -64,11 +82,25 @@ builder.Services.Configure<RagSettings>(
     builder.Configuration.GetSection("RagSettings"));
 builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection("EmailSettings"));
+// Override email credentials from environment variables (loaded from .env)
+builder.Services.PostConfigure<EmailSettings>(options =>
+{
+    var sender = Environment.GetEnvironmentVariable("EMAIL_SENDER");
+    var password = Environment.GetEnvironmentVariable("EMAIL_PASSWORD");
+    if (!string.IsNullOrEmpty(sender))
+    {
+        options.SenderEmail = sender;
+        options.Username = sender;
+    }
+    if (!string.IsNullOrEmpty(password))
+        options.Password = password;
+});
 
 // ── HTTP Clients ──────────────────────────────────────────────────────
 builder.Services.AddHttpClient<IEmbeddingService, OpenAIEmbeddingService>(client =>
 {
-    var apiKey = builder.Configuration["OpenAI:ApiKey"] ?? "";
+    var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY")
+                 ?? builder.Configuration["OpenAI:ApiKey"] ?? "";
     client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
     client.BaseAddress = new Uri(builder.Configuration["OpenAI:BaseUrl"] ?? "https://api.openai.com/v1");
     client.Timeout = TimeSpan.FromSeconds(60);
@@ -83,7 +115,8 @@ builder.Services.AddHttpClient<ILocalEmbeddingService, LocalEmbeddingService>(cl
 
 builder.Services.AddHttpClient<IOpenAiChatClient, OpenAiChatClient>(client =>
 {
-    var apiKey = builder.Configuration["OpenAI:ApiKey"] ?? "";
+    var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY")
+                 ?? builder.Configuration["OpenAI:ApiKey"] ?? "";
     client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
     client.DefaultRequestHeaders.Add("Accept", "application/json");
     client.DefaultRequestHeaders.Add("HTTP-Referer", "http://localhost:5000");
@@ -92,7 +125,7 @@ builder.Services.AddHttpClient<IOpenAiChatClient, OpenAiChatClient>(client =>
     client.Timeout = TimeSpan.FromSeconds(120);
 });
 
-// ── Services ──────────────────────────────────────────────────────────
+// ── Business Layer Services ───────────────────────────────────────────
 builder.Services.AddScoped<IDocumentParserService, DocumentParserService>();
 builder.Services.AddScoped<IChunkingService, ChunkingService>();
 builder.Services.AddScoped<IRagService, RagService>();
@@ -101,6 +134,13 @@ builder.Services.AddScoped<IBenchmarkService, BenchmarkService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IOtpService, OtpService>();
+
+// ── New Business Services (for decoupling pages from DbContext) ───────
+builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddScoped<ISystemConfigService, SystemConfigService>();
+builder.Services.AddScoped<IDocumentManagementService, DocumentManagementService>();
+builder.Services.AddScoped<IChatFeedbackService, ChatFeedbackService>();
 
 // ── SignalR ───────────────────────────────────────────────────────────
 builder.Services.AddSignalR(options =>

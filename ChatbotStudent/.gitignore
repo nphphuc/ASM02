@@ -1,0 +1,46 @@
+# ============================================
+# EduAI Chatbot Student - .gitignore
+# ============================================
+
+# ── Environment / Secrets ──────────────────────────
+.env
+.env.local
+.env.*.local
+*.env
+
+# ── IDE / Editor ──────────────────────────────────
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ── Build Output ──────────────────────────────────
+bin/
+obj/
+packages/
+*.nupkg
+
+# ── ASP.NET Core / EF Core ────────────────────────
+appsettings.*.local.json
+appsettings.*.Development.json
+appsettings.Development.json
+[Mm]igrations/
+
+# ── Uploaded Files ────────────────────────────────
+ChatbotStudent/Uploads/
+Uploads/
+
+# ── Logs ──────────────────────────────────────────
+logs/
+*.log
+*.tgz
+
+# ── User-specific files ───────────────────────────
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
