@@ -17,7 +17,9 @@ public class CourseService : ICourseService
 
     public Task<List<Course>> GetAllCoursesAsync()
     {
-        return _db.Courses.ToListAsync();
+        return _db.Courses
+            .Include(c => c.Lecturer)
+            .ToListAsync();
     }
 
     public Task<List<Course>> GetCoursesByLecturerAsync(int lecturerId)
@@ -52,6 +54,7 @@ public class CourseService : ICourseService
     public Task<Course?> GetCourseDetailAsync(int courseId)
     {
         return _db.Courses
+            .Include(c => c.Lecturer)
             .Include(c => c.Documents)
             .Include(c => c.ChatSessions)
             .Include(c => c.Enrollments)
@@ -84,5 +87,20 @@ public class CourseService : ICourseService
         await _db.SaveChangesAsync();
         _logger.LogInformation("Deleted course: {Name} (ID: {Id})", course.Name, courseId);
         return true;
+    }
+
+    public async Task AssignLecturerAsync(int courseId, int? lecturerId)
+    {
+        var course = await _db.Courses.FindAsync(courseId);
+        if (course == null)
+            throw new InvalidOperationException($"Course with ID {courseId} not found.");
+
+        course.LecturerId = lecturerId;
+        await _db.SaveChangesAsync();
+
+        if (lecturerId.HasValue)
+            _logger.LogInformation("Assigned lecturer {LecturerId} to course {CourseId}", lecturerId, courseId);
+        else
+            _logger.LogInformation("Removed lecturer from course {CourseId}", courseId);
     }
 }

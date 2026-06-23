@@ -23,11 +23,15 @@ public class CoursesModel : PageModel
     public List<Course> Courses { get; set; } = new();
     public List<User> Lecturers { get; set; } = new();
     public string? SuccessMessage { get; set; }
+    public string? ErrorMessage { get; set; }
 
     public async Task OnGetAsync()
     {
         Courses = await _courseService.GetAllCoursesAsync();
         Lecturers = await _userService.GetUsersByRoleAsync(UserRole.Lecturer);
+
+        if (TempData["SuccessMessage"] is string sm) SuccessMessage = sm;
+        if (TempData["ErrorMessage"] is string em) ErrorMessage = em;
     }
 
     public async Task<IActionResult> OnPostCreateCourseAsync(string name, string? code, string? description, int? lecturerId)
@@ -40,7 +44,7 @@ public class CoursesModel : PageModel
             await _userService.EnrollStudentInCourseAsync(lecturerId.Value, course.Id);
         }
 
-        SuccessMessage = $"Đã tạo môn học {name} thành công.";
+        TempData["SuccessMessage"] = $"Đã tạo môn học {name} thành công.";
         return RedirectToPage();
     }
 
@@ -49,9 +53,18 @@ public class CoursesModel : PageModel
         var success = await _courseService.DeleteCourseAsync(courseId);
         if (success)
         {
-            var course = await _courseService.GetCourseByIdAsync(courseId);
-            SuccessMessage = $"Đã xóa môn học.";
+            TempData["SuccessMessage"] = $"Đã xóa môn học.";
         }
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostAssignLecturerAsync(int courseId, int? lecturerId)
+    {
+        await _courseService.AssignLecturerAsync(courseId, lecturerId);
+        if (lecturerId.HasValue)
+            TempData["SuccessMessage"] = "Đã gán giảng viên cho môn học.";
+        else
+            TempData["SuccessMessage"] = "Đã gỡ giảng viên khỏi môn học.";
         return RedirectToPage();
     }
 }

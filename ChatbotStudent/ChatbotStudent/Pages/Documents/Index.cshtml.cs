@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace ChatbotStudent.Web.Pages.Documents;
 
-[Authorize]
+[Authorize(Roles = "Admin,Lecturer")]
 public class IndexModel : PageModel
 {
     private readonly IDocumentManagementService _documentService;
