@@ -103,8 +103,7 @@
                 <div class="chat-input-area">
                     <div class="chat-input-wrapper">
                         <textarea id="chatInput" class="form-control" rows="1"
-                                  placeholder="Nhập câu hỏi của bạn về môn học này..."
-                                  onkeydown="onChatKeydown(event)"></textarea>
+                                  placeholder="Nhập câu hỏi của bạn về môn học này..."></textarea>
                         <button class="btn btn-primary px-3" onclick="onSendClick()" id="sendBtn">
                             <i class="bi bi-send"></i>
                         </button>
@@ -182,13 +181,6 @@
         function onCourseChange(courseId) {
             if (courseId) {
                 window.location.href = '/Chat?courseId=' + courseId;
-            }
-        }
-
-        function onChatKeydown(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSendMessage();
             }
         }
 

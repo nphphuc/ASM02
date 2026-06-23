@@ -66,8 +66,8 @@ public class ChatHub : Hub
         var userMessage = await _chatService.AddMessageAsync(
             sessionId, MessageRole.User, question);
 
-        // Notify clients about user message
-        await Clients.Group($"session_{sessionId}").SendAsync("ReceiveMessage", new
+        // Notify other clients about user message (sender already appended locally)
+        await Clients.OthersInGroup($"session_{sessionId}").SendAsync("ReceiveMessage", new
         {
             role = "User",
             content = question,

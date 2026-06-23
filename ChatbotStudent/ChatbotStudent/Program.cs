@@ -76,6 +76,13 @@ builder.Services.AddAuthorization(options =>
 // ── Configuration ─────────────────────────────────────────────────────
 builder.Services.Configure<OpenAiOptions>(
     builder.Configuration.GetSection("OpenAI"));
+// Map OPENAI_API_KEY env var into OpenAiOptions.ApiKey (GeminiChatClient reads from options, not http headers)
+builder.Services.PostConfigure<OpenAiOptions>(options =>
+{
+    var envKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
+    if (!string.IsNullOrEmpty(envKey))
+        options.ApiKey = envKey;
+});
 builder.Services.Configure<EmbeddingServiceOptions>(
     builder.Configuration.GetSection("EmbeddingService"));
 builder.Services.Configure<RagSettings>(
@@ -113,15 +120,23 @@ builder.Services.AddHttpClient<ILocalEmbeddingService, LocalEmbeddingService>(cl
     client.Timeout = TimeSpan.FromSeconds(120);
 });
 
-builder.Services.AddHttpClient<IOpenAiChatClient, OpenAiChatClient>(client =>
+builder.Services.AddHttpClient<IOpenAiChatClient, GeminiChatClient>(client =>
+{
+    // Gemini API: API key goes in query parameter (?key=), NOT in Authorization header
+    client.BaseAddress = new Uri(
+        builder.Configuration["OpenAI:BaseUrl"] ?? "https://generativelanguage.googleapis.com");
+    client.Timeout = TimeSpan.FromSeconds(120);
+});
+
+// Keep OpenAiChatClient for fallback / future use (OpenRouter / OpenAI compatible APIs)
+builder.Services.AddHttpClient<OpenAiChatClient>(client =>
 {
     var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY")
                  ?? builder.Configuration["OpenAI:ApiKey"] ?? "";
     client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
     client.DefaultRequestHeaders.Add("Accept", "application/json");
-    client.DefaultRequestHeaders.Add("HTTP-Referer", "http://localhost:5000");
-    client.DefaultRequestHeaders.Add("X-Title", "Chatbot Student");
-    client.BaseAddress = new Uri(builder.Configuration["OpenAI:BaseUrl"] ?? "https://openrouter.ai/api/v1");
+    client.BaseAddress = new Uri(
+        builder.Configuration["OpenAI:BaseUrl"] ?? "https://api.openai.com/v1");
     client.Timeout = TimeSpan.FromSeconds(120);
 });
 
