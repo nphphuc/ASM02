@@ -23,32 +23,46 @@ public class CourseDetailModel : PageModel
     public Course? Course { get; set; }
     public List<User> Students { get; set; } = new();
     public List<User> AvailableStudents { get; set; } = new();
+    public List<User> Lecturers { get; set; } = new();
     public string? SuccessMessage { get; set; }
 
     public async Task OnGetAsync(int courseId)
     {
         Course = await _courseService.GetCourseDetailAsync(courseId);
-
         if (Course == null) return;
+
+        Lecturers = await _userService.GetUsersByRoleAsync(UserRole.Lecturer);
 
         Students = await _userService.GetUsersByRoleAsync(UserRole.Student);
         var enrolledIds = Course.Enrollments.Select(e => e.UserId).ToList();
         Students = Students.Where(s => enrolledIds.Contains(s.Id)).ToList();
 
         AvailableStudents = await _userService.GetStudentsNotEnrolledAsync(courseId);
+
+        if (TempData["SuccessMessage"] is string sm) SuccessMessage = sm;
     }
 
     public async Task<IActionResult> OnPostAddStudentAsync(int courseId, int userId)
     {
         var success = await _userService.EnrollStudentInCourseAsync(userId, courseId);
-        SuccessMessage = success ? "Đã thêm sinh viên vào lớp." : "Sinh viên đã có trong lớp.";
+        TempData["SuccessMessage"] = success ? "Đã thêm sinh viên vào lớp." : "Sinh viên đã có trong lớp.";
         return RedirectToPage(new { courseId });
     }
 
     public async Task<IActionResult> OnPostRemoveStudentAsync(int courseId, int userId)
     {
         await _userService.RemoveStudentFromCourseAsync(userId, courseId);
-        SuccessMessage = "Đã xóa sinh viên khỏi lớp.";
+        TempData["SuccessMessage"] = "Đã xóa sinh viên khỏi lớp.";
+        return RedirectToPage(new { courseId });
+    }
+
+    public async Task<IActionResult> OnPostAssignLecturerAsync(int courseId, int? lecturerId)
+    {
+        await _courseService.AssignLecturerAsync(courseId, lecturerId);
+        if (lecturerId.HasValue)
+            TempData["SuccessMessage"] = "Đã gán giảng viên cho môn học.";
+        else
+            TempData["SuccessMessage"] = "Đã gỡ giảng viên khỏi môn học.";
         return RedirectToPage(new { courseId });
     }
 }

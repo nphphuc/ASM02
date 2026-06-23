@@ -34,6 +34,19 @@
         </div>
     }
 
+    @if (Model.BulkResult != null && Model.BulkResult.Errors.Count > 0)
+    {
+        <div class="alert alert-warning">
+            <strong><i class="bi bi-exclamation-triangle me-1"></i> Chi tiết lỗi upload Excel:</strong>
+            <ul class="mb-0 mt-2" style="list-style: none; padding-left: 0;">
+                @foreach (var err in Model.BulkResult.Errors)
+                {
+                    <li><i class="bi bi-x-circle-fill text-danger me-1 small"></i> @err</li>
+                }
+            </ul>
+        </div>
+    }
+
     <!-- Stats -->
     <div class="row g-3 mb-4">
         <div class="col-md-3">
@@ -534,6 +547,10 @@
         // Reset modal fields when opened
         document.getElementById('createUserModal').addEventListener('show.bs.modal', function () {
             toggleUserFields();
+            // Init password toggle for password input inside modal
+            if (typeof initPasswordToggles === 'function') {
+                initPasswordToggles();
+            }
         });
     </script>
 }

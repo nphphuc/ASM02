@@ -232,3 +232,30 @@ const App = {
         });
     }
 };
+
+// ── Password Toggle ───────────────────────────────
+function initPasswordToggles() {
+    document.querySelectorAll('input[type="password"]').forEach(function(input) {
+        if (input.closest('.password-wrapper')) return;
+
+        var wrapper = document.createElement('div');
+        wrapper.className = 'password-wrapper';
+        input.parentNode.insertBefore(wrapper, input);
+        wrapper.appendChild(input);
+
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'password-toggle-btn';
+        btn.tabIndex = -1;
+        btn.setAttribute('aria-label', 'Hiển thị/ẩn mật khẩu');
+        btn.innerHTML = '<i class="bi bi-eye"></i>';
+        btn.addEventListener('click', function() {
+            var isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            btn.innerHTML = isPassword ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
+        });
+        wrapper.appendChild(btn);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', initPasswordToggles);

@@ -14,7 +14,10 @@
 
     @if (!string.IsNullOrEmpty(Model.SuccessMessage))
     {
-        <div class="alert alert-success">@Model.SuccessMessage</div>
+        <div class="alert alert-success alert-dismissible fade show">
+            @Model.SuccessMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
     }
 
     <!-- Course Info -->
@@ -27,6 +30,22 @@
                     <span class="badge bg-primary">@Model.Course?.Code</span>
                 </div>
                 <div class="col-md-4 text-md-end">
+                    <p class="mb-1">
+                        @if (Model.Course?.Lecturer != null)
+                        {
+                            <span class="badge bg-info text-dark fs-6">
+                                <i class="bi bi-person-badge me-1"></i>@Model.Course.Lecturer.FullName
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-muted"><i class="bi bi-dash-circle me-1"></i>Chưa có giảng viên</span>
+                        }
+                        <button class="btn btn-sm btn-outline-secondary ms-2"
+                                data-bs-toggle="modal" data-bs-target="#assignLecturerModal">
+                            <i class="bi bi-person-fill-gear"></i>
+                        </button>
+                    </p>
                     <p class="mb-1"><strong>@Model.Students.Count</strong> sinh viên</p>
                     <p class="mb-1"><strong>@Model.Course?.Documents.Count</strong> tài liệu</p>
                     <p class="mb-0"><strong>@Model.Course?.ChatSessions.Count</strong> phiên chat</p>
@@ -89,6 +108,50 @@
                     <p>Chưa có sinh viên nào đăng ký.</p>
                 </div>
             }
+        </div>
+    </div>
+</div>
+
+<!-- Assign Lecturer Modal -->
+<div class="modal fade" id="assignLecturerModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="AssignLecturer">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-person-fill-gear me-2"></i>Gán giảng viên</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="courseId" value="@Model.Course?.Id" />
+                    <p class="mb-3">Môn học: <strong>@Model.Course?.Name</strong></p>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Giảng viên phụ trách</label>
+                        <select name="lecturerId" class="form-select">
+                            @if (Model.Course?.Lecturer != null)
+                            {
+                                <option value="">-- Gỡ giảng viên hiện tại --</option>
+                                <option value="@Model.Course.LecturerId" selected>@Model.Course.Lecturer.FullName (@Model.Course.Lecturer.Email)</option>
+                            }
+                            else
+                            {
+                                <option value="">-- Chọn giảng viên --</option>
+                            }
+                            @foreach (var lecturer in Model.Lecturers)
+                            {
+                                if (lecturer.Id != Model.Course?.LecturerId)
+                                {
+                                    <option value="@lecturer.Id">@lecturer.FullName (@lecturer.Email)</option>
+                                }
+                            }
+                        </select>
+                        <div class="form-text">Chọn giảng viên mới để gán lại, hoặc chọn "Gỡ giảng viên" để bỏ.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> Lưu</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
