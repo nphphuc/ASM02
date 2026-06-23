@@ -54,7 +54,7 @@ public class ForgotPasswordModel : PageModel
             await _emailService.SendOtpEmailAsync(user.Email!, user.FullName, otp);
 
             // Store userId in TempData to pass to ResetPassword page
-            TempData["ResetUserId"] = user.Id;
+            TempData["ResetUserId"] = user.Id.ToString();
             TempData["ResetEmail"] = user.Email;
 
             _logger.LogInformation("OTP sent for password reset: {Email}", Email);

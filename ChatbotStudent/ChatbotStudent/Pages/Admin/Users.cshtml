@@ -8,9 +8,14 @@
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="fw-bold mb-0"><i class="bi bi-people me-2"></i>Quản lý người dùng</h4>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal">
-            <i class="bi bi-person-plus me-1"></i> Thêm người dùng
-        </button>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#uploadExcelModal">
+                <i class="bi bi-file-earmark-excel me-1"></i> Upload Excel
+            </button>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal">
+                <i class="bi bi-person-plus me-1"></i> Thêm người dùng
+            </button>
+        </div>
     </div>
 
     @if (!string.IsNullOrEmpty(Model.SuccessMessage))
@@ -312,6 +317,44 @@
     </div>
 </div>
 
+<!-- Upload Excel Modal -->
+<div class="modal fade" id="uploadExcelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" enctype="multipart/form-data" asp-page-handler="UploadExcel">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-file-earmark-excel me-2 text-success"></i>Upload danh sách từ Excel</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-1"></i>
+                        File Excel cần có các cột theo thứ tự:
+                        <strong>Họ tên</strong>, <strong>Email</strong>, <strong>Vai trò</strong> (Sinh viên / Giảng viên),
+                        <strong>Trường</strong>, <strong>Mã số</strong> (MSSV hoặc MGV).
+                        <br /><small>Hàng đầu tiên là tiêu đề cột, dữ liệu bắt đầu từ hàng 2.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Chọn file Excel</label>
+                        <input type="file" name="files" class="form-control" accept=".xlsx,.xls" required />
+                    </div>
+                    <div class="text-center mb-3">
+                        <a href="/Admin/Users?handler=DownloadTemplate" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-download me-1"></i> Tải file mẫu
+                        </a>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-upload me-1"></i> Upload & Tạo tài khoản
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Create User Modal -->
 <div class="modal fade" id="createUserModal" tabindex="-1">
     <div class="modal-dialog">
@@ -340,11 +383,36 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Vai trò</label>
-                        <select name="role" class="form-select">
+                        <select name="role" id="createUserRole" class="form-select" onchange="toggleUserFields()">
                             <option value="Student">Sinh viên</option>
                             <option value="Lecturer">Giảng viên</option>
                             <option value="Admin">Admin</option>
                         </select>
+                    </div>
+
+                    <!-- Student-specific fields -->
+                    <div id="studentFields" class="mb-3">
+                        <label class="form-label fw-semibold">Mã số sinh viên</label>
+                        <input type="text" name="studentCode" class="form-control" placeholder="VD: 2202xxxx" />
+                    </div>
+
+                    <!-- Lecturer-specific fields -->
+                    <div id="lecturerFields" style="display:none">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Mã số giảng viên</label>
+                            <input type="text" name="lecturerCode" class="form-control" placeholder="VD: GV.2021001" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Chức danh</label>
+                            <select name="title" class="form-select">
+                                <option value="">-- Chọn chức danh --</option>
+                                <option value="Giáo sư">Giáo sư</option>
+                                <option value="Phó giáo sư">Phó giáo sư</option>
+                                <option value="Tiến sĩ">Tiến sĩ</option>
+                                <option value="Thạc sĩ">Thạc sĩ</option>
+                                <option value="Giảng viên">Giảng viên</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -456,5 +524,16 @@
             document.getElementById('rejectUserName').innerHTML = '<strong>' + fullName + '</strong>';
             new bootstrap.Modal(document.getElementById('rejectModal')).show();
         }
+
+        function toggleUserFields() {
+            var role = document.getElementById('createUserRole').value;
+            document.getElementById('studentFields').style.display = role === 'Student' ? 'block' : 'none';
+            document.getElementById('lecturerFields').style.display = role === 'Lecturer' ? 'block' : 'none';
+        }
+
+        // Reset modal fields when opened
+        document.getElementById('createUserModal').addEventListener('show.bs.modal', function () {
+            toggleUserFields();
+        });
     </script>
 }

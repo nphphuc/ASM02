@@ -77,6 +77,43 @@ public class EmailService : IEmailService
         await SendEmailAsync(toEmail, subject, body);
     }
 
+    public async Task SendAccountCreatedNotificationAsync(string toEmail, string userName, string password, string role)
+    {
+        var roleText = role == "Lecturer" ? "Giảng viên" : "Sinh viên";
+        var subject = $"Tài khoản {roleText} đã được tạo - EduAI";
+        var body = $@"
+<!DOCTYPE html>
+<html>
+<head><meta charset='utf-8'></head>
+<body style='font-family:Arial,sans-serif;background:#f5f5f5;padding:20px'>
+    <div style='max-width:500px;margin:auto;background:#fff;border-radius:12px;padding:30px;box-shadow:0 2px 8px rgba(0,0,0,.1)'>
+        <div style='text-align:center;margin-bottom:20px'>
+            <h2 style='color:#4f46e5;margin:0'>🎓 EduAI</h2>
+            <p style='color:#666;font-size:14px'>Tài khoản đã được tạo</p>
+        </div>
+        <p>Xin chào <strong>{userName}</strong>,</p>
+        <p>Tài khoản <strong>{roleText}</strong> của bạn đã được admin tạo thành công trên hệ thống <strong>EduAI</strong>.</p>
+        <div style='background:#f0f0ff;border-left:4px solid #4f46e5;padding:16px;margin:16px 0;border-radius:8px'>
+            <p style='margin:0 0 8px 0;font-weight:600'>Thông tin đăng nhập:</p>
+            <p style='margin:0 0 4px 0'><strong>Email:</strong> {toEmail}</p>
+            <p style='margin:0'><strong>Mật khẩu:</strong> <code style='background:#e8e8ff;padding:2px 8px;border-radius:4px;font-size:16px'>{password}</code></p>
+        </div>
+        <p style='color:#999;font-size:13px'>Vui lòng đăng nhập và đổi mật khẩu ngay sau khi đăng nhập lần đầu.</p>
+        <div style='text-align:center;margin:25px 0'>
+            <a href='http://localhost:5000/Auth/Login'
+               style='display:inline-block;background:#4f46e5;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:600'>
+                Đăng nhập ngay
+            </a>
+        </div>
+        <hr style='border:none;border-top:1px solid #eee;margin:20px 0' />
+        <p style='color:#999;font-size:12px;text-align:center'>EduAI - Hệ thống Chatbot hỗ trợ học tập</p>
+    </div>
+</body>
+</html>";
+
+        await SendEmailAsync(toEmail, subject, body);
+    }
+
     public async Task SendApprovalNotificationAsync(string toEmail, string userName, bool approved, string? reason = null)
     {
         if (approved)
