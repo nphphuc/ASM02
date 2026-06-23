@@ -171,8 +171,9 @@ public class ResetPasswordModel : PageModel
         var otp = await _otpService.GenerateOtpAsync(user.Id);
         await _emailService.SendOtpEmailAsync(user.Email!, user.FullName, otp);
 
-        TempData["ResetUserId"] = user.Id;
+        TempData["ResetUserId"] = user.Id.ToString();
         TempData["ResetEmail"] = user.Email;
+        Email = user.Email;
 
         _logger.LogInformation("OTP resent for password reset: {Email}", email);
         SuccessMessage = "Mã OTP mới đã được gửi đến email của bạn.";

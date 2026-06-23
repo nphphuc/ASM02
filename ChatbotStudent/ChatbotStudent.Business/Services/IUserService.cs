@@ -23,4 +23,19 @@ public interface IUserService
     Task<bool> EnrollStudentInCourseAsync(int userId, int courseId);
     Task<bool> RemoveStudentFromCourseAsync(int userId, int courseId);
     Task<List<User>> GetStudentsNotEnrolledAsync(int courseId);
+
+    /// <summary>Create user and send welcome email with password.</summary>
+    Task<User> CreateUserWithNotificationAsync(string email, string password, string fullName, UserRole role,
+        string universityName, string? studentCode, string? lecturerCode, string? title);
+
+    /// <summary>Bulk create users from an Excel/CSV file and send welcome emails.</summary>
+    Task<BulkCreateResult> BulkCreateUsersFromExcelAsync(Stream fileStream, string fileName);
+}
+
+public class BulkCreateResult
+{
+    public int SuccessCount { get; set; }
+    public int FailCount { get; set; }
+    public List<string> Errors { get; set; } = new();
+    public List<string> SuccessEmails { get; set; } = new();
 }

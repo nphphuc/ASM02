@@ -1,5 +1,7 @@
+using System.Security.Cryptography;
 using ChatbotStudent.Data;
 using ChatbotStudent.Data.Models;
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -95,6 +97,110 @@ public class UserService : IUserService
         return user;
     }
 
+    public async Task<User> CreateUserWithNotificationAsync(string email, string password, string fullName,
+        UserRole role, string universityName, string? studentCode, string? lecturerCode, string? title)
+    {
+        var user = await CreateUserWithDetailsAsync(email, password, fullName, role,
+            universityName, studentCode, lecturerCode, title, autoApprove: true);
+
+        // Send welcome email with credentials
+        if (user.Email != null)
+        {
+            await _emailService.SendAccountCreatedNotificationAsync(
+                user.Email, user.FullName, password, role.ToString());
+        }
+
+        return user;
+    }
+
+    public async Task<BulkCreateResult> BulkCreateUsersFromExcelAsync(Stream fileStream, string fileName)
+    {
+        var result = new BulkCreateResult();
+
+        try
+        {
+            using var workbook = new XLWorkbook(fileStream);
+            var worksheet = workbook.Worksheet(1);
+            var rows = worksheet.RangeUsed().RowsUsed().Skip(1); // Skip header row
+
+            foreach (var row in rows)
+            {
+                try
+                {
+                    var fullName = row.Cell(1).GetString().Trim();
+                    var email = row.Cell(2).GetString().Trim();
+                    var roleStr = row.Cell(3).GetString().Trim();
+                    var university = row.Cell(4).GetString().Trim();
+                    var code = row.Cell(5).GetString().Trim();
+
+                    if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(email))
+                    {
+                        result.FailCount++;
+                        result.Errors.Add($"Dòng {row.RowNumber()}: Thiếu họ tên hoặc email.");
+                        continue;
+                    }
+
+                    if (!email.Contains('@'))
+                    {
+                        result.FailCount++;
+                        result.Errors.Add($"Dòng {row.RowNumber()}: Email '{email}' không hợp lệ.");
+                        continue;
+                    }
+
+                    var role = roleStr.ToLowerInvariant() switch
+                    {
+                        "giang vien" or "lecturer" or "gv" => UserRole.Lecturer,
+                        _ => UserRole.Student
+                    };
+
+                    // Generate random password
+                    var password = GenerateRandomPassword();
+
+                    if (role == UserRole.Lecturer)
+                    {
+                        await CreateUserWithDetailsAsync(email, password, fullName, role,
+                            university, null, string.IsNullOrEmpty(code) ? null : code, null, autoApprove: true);
+                    }
+                    else
+                    {
+                        await CreateUserWithDetailsAsync(email, password, fullName, role,
+                            university, string.IsNullOrEmpty(code) ? null : code, null, null, autoApprove: true);
+                    }
+
+                    // Send welcome email
+                    await _emailService.SendAccountCreatedNotificationAsync(
+                        email, fullName, password, role.ToString());
+
+                    result.SuccessCount++;
+                    result.SuccessEmails.Add(email);
+                    _logger.LogInformation("Bulk created user {Email} with role {Role}", email, role);
+                }
+                catch (Exception ex)
+                {
+                    result.FailCount++;
+                    result.Errors.Add($"Dòng {row.RowNumber()}: {ex.Message}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            result.Errors.Add($"Lỗi đọc file Excel: {ex.Message}");
+        }
+
+        _logger.LogInformation("Bulk create result: {Success} success, {Fail} failed",
+            result.SuccessCount, result.FailCount);
+        return result;
+    }
+
+    private static string GenerateRandomPassword()
+    {
+        const string chars = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        var password = new char[8];
+        for (var i = 0; i < 8; i++)
+            password[i] = chars[RandomNumberGenerator.GetInt32(chars.Length)];
+        return new string(password) + "@1";
+    }
+
     public async Task<bool> ApproveUserAsync(int userId)
     {
         var user = await _userManager.FindByIdAsync(userId.ToString());
@@ -106,7 +212,6 @@ public class UserService : IUserService
 
         _logger.LogInformation("Approved user {Email}", user.Email);
 
-        // Send email notification
         if (user.Email != null)
         {
             await _emailService.SendApprovalNotificationAsync(user.Email, user.FullName, true);
@@ -127,7 +232,6 @@ public class UserService : IUserService
 
         _logger.LogInformation("Rejected user {Email}: {Reason}", user.Email, reason);
 
-        // Send email notification
         if (user.Email != null)
         {
             await _emailService.SendApprovalNotificationAsync(user.Email, user.FullName, false, reason);
@@ -149,11 +253,9 @@ public class UserService : IUserService
         var user = await _userManager.FindByIdAsync(userId.ToString());
         if (user == null) return false;
 
-        // Remove from all existing roles
         var currentRoles = await _userManager.GetRolesAsync(user);
         await _userManager.RemoveFromRolesAsync(user, currentRoles);
 
-        // Add to new role
         var roleName = newRole.ToString();
         if (!await _roleManager.RoleExistsAsync(roleName))
         {
