@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "ChatbotStudent": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:62568;http://localhost:62569"
+    }
+  }
+}

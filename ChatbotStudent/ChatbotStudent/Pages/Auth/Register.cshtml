@@ -1,0 +1,172 @@
+@page
+@model ChatbotStudent.Pages.Auth.RegisterModel
+@{
+    ViewData["Title"] = "Đăng ký";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng ký - AI Chatbot Sinh Viên</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        :root { --primary: #4f46e5; --primary-dark: #3730a3; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+        }
+        .auth-card {
+            background: #fff; border-radius: 20px; padding: 2.5rem;
+            width: 100%; max-width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,.15);
+        }
+        .auth-card .logo { text-align: center; margin-bottom: 1.5rem; }
+        .auth-card .logo i { font-size: 3rem; color: var(--primary); }
+        .auth-card .logo h3 { font-weight: 700; margin-top: .5rem; color: #1e293b; }
+        .form-control {
+            padding: .75rem 1rem; border-radius: 12px; border: 2px solid #e2e8f0;
+            font-size: .95rem; transition: all .2s;
+        }
+        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,70,229,.15); }
+        .btn-primary {
+            background: var(--primary); border: none; border-radius: 12px;
+            padding: .75rem; font-weight: 600; transition: all .2s;
+        }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,70,229,.3); }
+        .form-label { font-weight: 500; font-size: .9rem; color: #475569; }
+        .auth-footer { text-align: center; margin-top: 1.5rem; font-size: .9rem; color: #64748b; }
+        .alert { border-radius: 12px; }
+    </style>
+</head>
+<body>
+    <div class="auth-card">
+        <div class="logo">
+            <i class="bi bi-robot"></i>
+            <h3>Đăng ký tài khoản</h3>
+            <p class="text-muted">Tạo tài khoản mới để sử dụng hệ thống</p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger">@Model.ErrorMessage</div>
+        }
+
+        <form method="post">
+            <div class="mb-3">
+                <label class="form-label">Họ và tên</label>
+                <input type="text" name="fullName" class="form-control" placeholder="Nguyễn Văn A" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-control" placeholder="nhap@email.com" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Mật khẩu</label>
+                <input type="password" name="password" class="form-control" placeholder="Ít nhất 6 ký tự" required minlength="6" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Xác nhận mật khẩu</label>
+                <input type="password" name="confirmPassword" class="form-control" placeholder="Nhập lại mật khẩu" required />
+            </div>
+
+            <hr class="my-3" />
+            <h6 class="fw-semibold mb-3 text-muted"><i class="bi bi-building me-1"></i>Thông tin xác thực</h6>
+
+            <div class="mb-3">
+                <label class="form-label">Trường đại học <span class="text-danger">*</span></label>
+                <input type="text" name="universityName" class="form-control" placeholder="Đại học Công nghệ, ĐHQGHN" required />
+            </div>
+
+            <div class="mb-3" id="studentFields">
+                <label class="form-label">Mã số sinh viên <span class="text-danger">*</span></label>
+                <input type="text" name="studentCode" class="form-control" placeholder="2202xxxx" />
+            </div>
+
+            <div class="mb-3" id="lecturerFields" style="display:none">
+                <label class="form-label">Mã số giảng viên <span class="text-danger">*</span></label>
+                <input type="text" name="lecturerCode" class="form-control" placeholder="GV.xxxxxx" />
+            </div>
+
+            <div class="mb-3" id="titleFields" style="display:none">
+                <label class="form-label">Chức danh <span class="text-danger">*</span></label>
+                <select name="title" class="form-select" id="titleSelect">
+                    <option value="">-- Chọn chức danh --</option>
+                    <option value="Giảng viên">Giảng viên</option>
+                    <option value="Giảng viên chính">Giảng viên chính</option>
+                    <option value="Phó giáo sư">Phó giáo sư</option>
+                    <option value="Giáo sư">Giáo sư</option>
+                    <option value="Trợ lý giảng dạy">Trợ lý giảng dạy</option>
+                    <option value="Trưởng bộ môn">Trưởng bộ môn</option>
+                    <option value="Phó trưởng bộ môn">Phó trưởng bộ môn</option>
+                    <option value="Trưởng khoa">Trưởng khoa</option>
+                    <option value="__other__">Khác (nhập bên dưới)</option>
+                </select>
+                <input type="text" name="customTitle" class="form-control mt-2" id="customTitleInput"
+                       placeholder="Nhập chức danh của bạn..." style="display:none" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Vai trò</label>
+                <select name="role" class="form-select" id="roleSelect">
+                    <option value="Student">Sinh viên</option>
+                    <option value="Lecturer">Giảng viên</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-person-plus me-1"></i> Đăng ký
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            Đã có tài khoản? <a href="/Auth/Login" class="fw-semibold" style="color:var(--primary)">Đăng nhập</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var roleSelect = document.getElementById('roleSelect');
+            var studentFields = document.getElementById('studentFields');
+            var lecturerFields = document.getElementById('lecturerFields');
+            var titleFields = document.getElementById('titleFields');
+            var titleSelect = document.getElementById('titleSelect');
+            var customTitleInput = document.getElementById('customTitleInput');
+
+            function toggleFields() {
+                var isLecturer = roleSelect.value === 'Lecturer';
+                studentFields.style.display = isLecturer ? 'none' : '';
+                lecturerFields.style.display = isLecturer ? '' : 'none';
+                titleFields.style.display = isLecturer ? '' : 'none';
+
+                // Toggle required attributes
+                var studentCode = document.querySelector('input[name="studentCode"]');
+                var lecturerCode = document.querySelector('input[name="lecturerCode"]');
+                studentCode.required = !isLecturer;
+                lecturerCode.required = isLecturer;
+                titleSelect.required = isLecturer;
+            }
+
+            function handleTitleChange() {
+                customTitleInput.style.display = titleSelect.value === '__other__' ? '' : 'none';
+                if (titleSelect.value === '__other__') {
+                    customTitleInput.required = true;
+                    titleSelect.required = false;
+                } else {
+                    customTitleInput.required = false;
+                    titleSelect.required = true;
+                }
+            }
+
+            roleSelect.addEventListener('change', toggleFields);
+            titleSelect.addEventListener('change', handleTitleChange);
+            toggleFields();
+            handleTitleChange();
+        });
+    </script>
+    </div>
+</body>
+</html>

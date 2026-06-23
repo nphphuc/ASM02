@@ -1,0 +1,125 @@
+@page
+@model ChatbotStudent.Pages.Admin.CourseDetailModel
+@{
+    ViewData["Title"] = Model.Course?.Name ?? "Chi tiết môn học";
+}
+
+<div class="container-fluid">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/Admin/Courses">Môn học</a></li>
+            <li class="breadcrumb-item active">@Model.Course?.Name</li>
+        </ol>
+    </nav>
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success">@Model.SuccessMessage</div>
+    }
+
+    <!-- Course Info -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <h4 class="fw-bold">@Model.Course?.Name</h4>
+                    <p class="text-muted">@Model.Course?.Description</p>
+                    <span class="badge bg-primary">@Model.Course?.Code</span>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <p class="mb-1"><strong>@Model.Students.Count</strong> sinh viên</p>
+                    <p class="mb-1"><strong>@Model.Course?.Documents.Count</strong> tài liệu</p>
+                    <p class="mb-0"><strong>@Model.Course?.ChatSessions.Count</strong> phiên chat</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enrolled Students -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-people me-1"></i> Sinh viên đã đăng ký</span>
+            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+                <i class="bi bi-person-plus me-1"></i> Thêm sinh viên
+            </button>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.Students.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Họ và tên</th>
+                                <th>Email</th>
+                                <th>Ngày tham gia</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (var i = 0; i < Model.Students.Count; i++)
+                            {
+                                var student = Model.Students[i];
+                                <tr>
+                                    <td>@(i + 1)</td>
+                                    <td class="fw-semibold">@student.FullName</td>
+                                    <td>@student.Email</td>
+                                    <td>@student.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        <form method="post" asp-page-handler="RemoveStudent"
+                                              onsubmit="return confirm('Xóa sinh viên @student.FullName khỏi lớp?')">
+                                            <input type="hidden" name="userId" value="@student.Id" />
+                                            <input type="hidden" name="courseId" value="@Model.Course?.Id" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-person-x"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center p-4 text-muted">
+                    <i class="bi bi-people fs-1 d-block mb-2"></i>
+                    <p>Chưa có sinh viên nào đăng ký.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Add Student Modal -->
+<div class="modal fade" id="addStudentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="AddStudent">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-person-plus me-2"></i>Thêm sinh viên</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="courseId" value="@Model.Course?.Id" />
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Chọn sinh viên</label>
+                        <select name="userId" class="form-select" required>
+                            <option value="">-- Chọn sinh viên --</option>
+                            @foreach (var s in Model.AvailableStudents)
+                            {
+                                <option value="@s.Id">@s.FullName (@s.Email)</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-plus me-1"></i> Thêm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

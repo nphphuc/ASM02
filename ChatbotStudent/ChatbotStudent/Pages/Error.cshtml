@@ -1,0 +1,16 @@
+@page
+@model ChatbotStudent.Pages.ErrorModel
+@{
+    ViewData["Title"] = "Lỗi";
+}
+
+<div class="container text-center mt-5">
+    <i class="bi bi-exclamation-triangle text-warning" style="font-size:4rem"></i>
+    <h1 class="mt-3">Đã xảy ra lỗi</h1>
+    <p class="text-muted">Xin lỗi, đã xảy ra lỗi trong quá trình xử lý yêu cầu của bạn.</p>
+    @if (Model.ShowRequestId)
+    {
+        <p class="small text-muted">Request ID: <code>@Model.RequestId</code></p>
+    }
+    <a href="/" class="btn btn-primary mt-3">Về trang chủ</a>
+</div>

@@ -1,0 +1,460 @@
+@page
+@model ChatbotStudent.Pages.Admin.UsersModel
+@{
+    ViewData["Title"] = "Quản lý người dùng";
+    var pendingCount = Model.PendingUsers.Count;
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold mb-0"><i class="bi bi-people me-2"></i>Quản lý người dùng</h4>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal">
+            <i class="bi bi-person-plus me-1"></i> Thêm người dùng
+        </button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @Model.SuccessMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            @Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="stat-card card">
+                <div class="stat-value text-primary">@Model.Users.Count</div>
+                <div class="stat-label">Tổng người dùng</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card card green">
+                <div class="stat-value text-success">@Model.Users.Count(u => u.Role == ChatbotStudent.Models.UserRole.Admin)</div>
+                <div class="stat-label">Admin</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card card blue">
+                <div class="stat-value text-info">@Model.Users.Count(u => u.Role == ChatbotStudent.Models.UserRole.Lecturer)</div>
+                <div class="stat-label">Giảng viên</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card card amber">
+                <div class="stat-value" style="color:var(--accent)">@Model.Users.Count(u => u.Role == ChatbotStudent.Models.UserRole.Student)</div>
+                <div class="stat-label">Sinh viên</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- Pending Users Section -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    @if (pendingCount > 0)
+    {
+        <div class="card border-warning mb-4">
+            <div class="card-header bg-warning bg-opacity-10 text-warning-emphasis fw-semibold">
+                <i class="bi bi-exclamation-triangle me-1"></i> Tài khoản chờ duyệt (@pendingCount)
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-warning">
+                            <tr>
+                                <th>Họ tên</th>
+                                <th>Email</th>
+                                <th>Vai trò</th>
+                                <th>Trường</th>
+                                <th>MSSV / MGV</th>
+                                <th>Chức danh</th>
+                                <th>Ngày ĐK</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model.PendingUsers)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@user.FullName</td>
+                                    <td>@user.Email</td>
+                                    <td><span class="badge bg-info">@(user.Role == UserRole.Lecturer ? "Giảng viên" : "Sinh viên")</span></td>
+                                    <td>@user.UniversityName</td>
+                                    <td>
+                                        @if (user.Role == UserRole.Student)
+                                        {
+                                            <span class="badge bg-light text-dark">@user.StudentCode</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-light text-dark">@user.LecturerCode</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (user.Role == UserRole.Lecturer)
+                                        {
+                                            <span class="badge bg-secondary">@user.Title</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+                                    <td class="small">@user.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>
+                                        <div class="d-flex gap-1">
+                                            <form method="post" asp-page-handler="Approve" style="display:inline">
+                                                <input type="hidden" name="userId" value="@user.Id" />
+                                                <button type="submit" class="btn btn-sm btn-success"
+                                                        onclick="return confirm('Duyệt tài khoản @user.FullName?')">
+                                                    <i class="bi bi-check-lg"></i> Duyệt
+                                                </button>
+                                            </form>
+                                            <button class="btn btn-sm btn-outline-danger" onclick="showRejectModal(@user.Id, '@user.FullName')">
+                                                <i class="bi bi-x-lg"></i> Từ chối
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- All Users Section -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <input type="text" class="form-control" id="searchInput" placeholder="🔍 Tìm kiếm theo tên hoặc email..." />
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="roleFilter" onchange="filterTable()">
+                        <option value="">Tất cả vai trò</option>
+                        <option value="Admin">Admin</option>
+                        <option value="Lecturer">Giảng viên</option>
+                        <option value="Student">Sinh viên</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="statusFilter" onchange="filterTable()">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="true">Đang hoạt động</option>
+                        <option value="false">Đã vô hiệu hóa</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">Bỏ lọc</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="card">
+        <div class="card-header"><i class="bi bi-list-ul me-1"></i> Danh sách người dùng</div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="usersTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Họ và tên</th>
+                            <th>Email</th>
+                            <th>Trường</th>
+                            <th>Vai trò</th>
+                            <th>Duyệt</th>
+                            <th>Trạng thái</th>
+                            <th>Đăng nhập cuối</th>
+                            <th>Ngày tạo</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (var i = 0; i < Model.Users.Count; i++)
+                        {
+                            var user = Model.Users[i];
+                            var roleBadge = user.Role switch
+                            {
+                                ChatbotStudent.Models.UserRole.Admin => "danger",
+                                ChatbotStudent.Models.UserRole.Lecturer => "success",
+                                ChatbotStudent.Models.UserRole.Student => "primary",
+                                _ => "secondary"
+                            };
+                            var approvalBadge = user.ApprovalStatus switch
+                            {
+                                ChatbotStudent.Models.ApprovalStatus.Pending => "warning",
+                                ChatbotStudent.Models.ApprovalStatus.Rejected => "danger",
+                                _ => "success"
+                            };
+                            var approvalText = user.ApprovalStatus switch
+                            {
+                                ChatbotStudent.Models.ApprovalStatus.Pending => "Chờ duyệt",
+                                ChatbotStudent.Models.ApprovalStatus.Rejected => "Từ chối",
+                                _ => "✓ Đã duyệt"
+                            };
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td class="fw-semibold">@user.FullName</td>
+                                <td>@user.Email</td>
+                                <td class="small">
+                                    @if (!string.IsNullOrEmpty(user.UniversityName))
+                                    {
+                                        <span>@user.UniversityName</span>
+                                        @if (user.Role == UserRole.Student && !string.IsNullOrEmpty(user.StudentCode))
+                                        {
+                                            <br /><span class="badge bg-light text-dark">@user.StudentCode</span>
+                                        }
+                                        @if (user.Role == UserRole.Lecturer)
+                                        {
+                                            <br /><span class="badge bg-light text-dark">@user.LecturerCode</span>
+                                            if (!string.IsNullOrEmpty(user.Title))
+                                            {
+                                                <span class="badge bg-secondary ms-1">@user.Title</span>
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">—</span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge bg-@roleBadge">@user.Role</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-@approvalBadge">@approvalText</span>
+                                    @if (user.ApprovalStatus == ChatbotStudent.Models.ApprovalStatus.Rejected && !string.IsNullOrEmpty(user.RejectionReason))
+                                    {
+                                        <br /><span class="text-danger small" title="@user.RejectionReason">@user.RejectionReason</span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge-status @(user.IsActive ? "completed" : "failed")">
+                                        @(user.IsActive ? "✓ Hoạt động" : "✕ Bị khóa")
+                                    </span>
+                                </td>
+                                <td>@(user.LastLoginAt?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa đăng nhập")</td>
+                                <td>@user.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                            <i class="bi bi-gear"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <form method="post" asp-page-handler="ToggleActive">
+                                                    <input type="hidden" name="userId" value="@user.Id" />
+                                                    <button type="submit" class="dropdown-item @(user.IsActive ? "text-warning" : "text-success")">
+                                                        <i class="bi @(user.IsActive ? "bi-pause-circle" : "bi-play-circle") me-1"></i>
+                                                        @(user.IsActive ? "Vô hiệu hóa" : "Kích hoạt")
+                                                    </button>
+                                                </form>
+                                            </li>
+                                            <li>
+                                                <button class="dropdown-item" onclick="changeRole(@user.Id, '@user.Role')">
+                                                    <i class="bi bi-shuffle me-1"></i> Đổi vai trò
+                                                </button>
+                                            </li>
+                                            @if (user.ApprovalStatus == ChatbotStudent.Models.ApprovalStatus.Rejected)
+                                            {
+                                                <li>
+                                                    <form method="post" asp-page-handler="Approve">
+                                                        <input type="hidden" name="userId" value="@user.Id" />
+                                                        <button type="submit" class="dropdown-item text-success">
+                                                            <i class="bi bi-check-circle me-1"></i> Duyệt lại
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            }
+                                            @if (user.Role == ChatbotStudent.Models.UserRole.Student)
+                                            {
+                                                <li>
+                                                    <a class="dropdown-item" href="/Admin/Courses?userId=@user.Id">
+                                                        <i class="bi bi-book me-1"></i> Quản lý môn học
+                                                    </a>
+                                                </li>
+                                            }
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <form method="post" asp-page-handler="Delete"
+                                                      onsubmit="return confirm('Xóa người dùng @user.FullName?')">
+                                                    <input type="hidden" name="userId" value="@user.Id" />
+                                                    <button type="submit" class="dropdown-item text-danger">
+                                                        <i class="bi bi-trash me-1"></i> Xóa
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create User Modal -->
+<div class="modal fade" id="createUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="CreateUser">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-person-plus me-2"></i>Thêm người dùng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Họ và tên</label>
+                        <input type="text" name="fullName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Email</label>
+                        <input type="email" name="email" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Mật khẩu</label>
+                        <input type="password" name="password" class="form-control" required minlength="6" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Trường đại học</label>
+                        <input type="text" name="universityName" class="form-control" placeholder="Đại học Công nghệ, ĐHQGHN" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Vai trò</label>
+                        <select name="role" class="form-select">
+                            <option value="Student">Sinh viên</option>
+                            <option value="Lecturer">Giảng viên</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> Tạo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Change Role Modal -->
+<div class="modal fade" id="changeRoleModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="ChangeRole">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-shuffle me-2"></i>Đổi vai trò</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="userId" id="changeRoleUserId" />
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Vai trò mới</label>
+                        <select name="newRole" class="form-select" id="changeRoleSelect">
+                            <option value="Student">Sinh viên</option>
+                            <option value="Lecturer">Giảng viên</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="Reject">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-x-circle me-2 text-danger"></i>Từ chối tài khoản</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="userId" id="rejectUserId" />
+                    <p class="mb-2" id="rejectUserName"></p>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Lý do từ chối <span class="text-danger">*</span></label>
+                        <textarea name="rejectionReason" class="form-control" rows="3" required
+                                  placeholder="Nhập lý do từ chối tài khoản này..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-x-lg me-1"></i> Từ chối</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function filterTable() {
+            var search = document.getElementById('searchInput').value.toLowerCase();
+            var role = document.getElementById('roleFilter').value;
+            var status = document.getElementById('statusFilter').value;
+            var rows = document.querySelectorAll('#usersTable tbody tr');
+
+            rows.forEach(function(row) {
+                var name = row.cells[1].textContent.toLowerCase();
+                var email = row.cells[2].textContent.toLowerCase();
+                var userRole = row.cells[4].textContent.trim();
+                var isActive = row.cells[6].querySelector('.badge-status').classList.contains('completed');
+
+                var matchSearch = name.includes(search) || email.includes(search);
+                var matchRole = !role || userRole === role;
+                var matchStatus = status === '' || (status === 'true' && isActive) || (status === 'false' && !isActive);
+
+                row.style.display = matchSearch && matchRole && matchStatus ? '' : 'none';
+            });
+        }
+
+        document.getElementById('searchInput').addEventListener('input', filterTable);
+        document.getElementById('roleFilter').addEventListener('change', filterTable);
+        document.getElementById('statusFilter').addEventListener('change', filterTable);
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('roleFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            filterTable();
+        }
+
+        function changeRole(userId, currentRole) {
+            document.getElementById('changeRoleUserId').value = userId;
+            document.getElementById('changeRoleSelect').value = currentRole;
+            new bootstrap.Modal(document.getElementById('changeRoleModal')).show();
+        }
+
+        function showRejectModal(userId, fullName) {
+            document.getElementById('rejectUserId').value = userId;
+            document.getElementById('rejectUserName').innerHTML = '<strong>' + fullName + '</strong>';
+            new bootstrap.Modal(document.getElementById('rejectModal')).show();
+        }
+    </script>
+}

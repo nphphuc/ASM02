@@ -1,0 +1,339 @@
+@page
+@model ChatbotStudent.Pages.Documents.IndexModel
+@{
+    ViewData["Title"] = "Quản lý tài liệu";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold mb-0"><i class="bi bi-file-earmark-text me-2"></i>Quản lý tài liệu</h4>
+        @if (User.IsInRole("Admin") || User.IsInRole("Lecturer"))
+        {
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                <i class="bi bi-cloud-arrow-up me-1"></i> Upload tài liệu
+            </button>
+        }
+    </div>
+
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card card">
+                <div class="stat-value text-primary">@Model.Documents.Count</div>
+                <div class="stat-label">Tổng tài liệu</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card card green">
+                <div class="stat-value text-success">@Model.Documents.Count(d => d.Status == ChatbotStudent.Models.ProcessingStatus.Completed)</div>
+                <div class="stat-label">Đã xử lý</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card card blue">
+                <div class="stat-value text-info">@Model.TotalChunks</div>
+                <div class="stat-label">Tổng chunks</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document list -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-list-ul me-1"></i> Danh sách tài liệu</span>
+            <select class="form-select form-select-sm w-auto" id="courseFilter" onchange="this.form.submit()">
+                <option value="">Tất cả môn học</option>
+                @foreach (var c in Model.Courses)
+                {
+                    <option value="@c.Id" selected="@(Model.SelectedCourseId == c.Id)">@c.Name (@c.Code)</option>
+                }
+            </select>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.Documents.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Tên file</th>
+                                <th>Loại</th>
+                                <th>Môn học</th>
+                                <th>Chương</th>
+                                <th>Trạng thái</th>
+                                <th>Chunks</th>
+                                <th>Ngày upload</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (var i = 0; i < Model.Documents.Count; i++)
+                            {
+                                var doc = Model.Documents[i];
+                                <tr>
+                                    <td>@(i + 1)</td>
+                                    <td>
+                                        <i class="bi @GetFileIcon(doc.FileType) me-1"></i>
+                                        @doc.FileName
+                                    </td>
+                                    <td><span class="badge bg-secondary">@doc.FileType</span></td>
+                                    <td>@doc.Course?.Name</td>
+                                    <td>@(doc.Chapter ?? "-")</td>
+                                    <td>
+                                        <span class="badge-status @doc.Status.ToString().ToLower()">
+                                            @GetStatusText(doc.Status)
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @doc.Chunks.Count
+                                        @if (doc.Chunks.Count > 0)
+                                        {
+                                            <button class="btn btn-sm btn-outline-info ms-1"
+                                                    onclick="viewChunks(@doc.Id, '@doc.FileName')"
+                                                    title="Xem chi tiết chunks">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        }
+                                    </td>
+                                    <td>@doc.UploadedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>
+                                        @if (User.IsInRole("Admin") || User.IsInRole("Lecturer"))
+                                        {
+                                            <form method="post" asp-page-handler="Delete" class="d-inline">
+                                                <input type="hidden" name="documentId" value="@doc.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                        onclick="return confirm('Xóa tài liệu này?')">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small"><i class="bi bi-eye"></i> Chỉ xem</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center p-5 text-muted">
+                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                    <p>Chưa có tài liệu nào. Hãy upload tài liệu để bắt đầu!</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Chunks Detail Modal -->
+<div class="modal fade" id="chunksModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-list-task me-2"></i>Chi tiết Chunks - <span id="chunksModalDocName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="chunksModalBody">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Đang tải chunks...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Modal -->
+<div class="modal fade" id="uploadModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" enctype="multipart/form-data" asp-page-handler="Upload">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-cloud-arrow-up me-2"></i>Upload tài liệu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Môn học</label>
+                        <select name="courseId" class="form-select" required>
+                            <option value="">-- Chọn môn học --</option>
+                            @foreach (var c in Model.Courses)
+                            {
+                                <option value="@c.Id">@c.Name (@c.Code)</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Chương (tùy chọn)</label>
+                        <input type="text" name="chapter" class="form-control" placeholder="VD: Chương 1, Bài 5..." />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Chiến lược Chunking</label>
+                        <select name="chunkingStrategy" class="form-select">
+                            <option value="Recursive">Recursive (Khuyến nghị)</option>
+                            <option value="FixedSize">FixedSize (Cố định)</option>
+                            <option value="SentenceBased">SentenceBased (Theo câu)</option>
+                            <option value="ParagraphBased">ParagraphBased (Theo đoạn)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Embedding Model</label>
+                        <select name="embeddingModel" class="form-select">
+                            <option value="OpenAI">text-embedding-3-small (OpenAI)</option>
+                            <option value="multilingual-e5-base">multilingual-e5-base (HuggingFace)</option>
+                            <option value="bge-m3">bge-m3 (BAAI)</option>
+                            <option value="phobert">PhoBERT-base (VietAI)</option>
+                        </select>
+                    </div>
+                    <div id="uploadZone" class="upload-zone">
+                        <i class="bi bi-cloud-arrow-up"></i>
+                        <h5 class="mt-2">Kéo thả file hoặc click để chọn</h5>
+                        <p class="text-muted mb-0">Hỗ trợ: PDF, DOCX, PPTX (tối đa 50MB)</p>
+                        <input type="file" id="fileInput" name="files" multiple
+                               accept=".pdf,.docx,.pptx" style="display:none" />
+                    </div>
+                    <div id="filePreview"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-upload me-1"></i> Upload & Xử lý
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetFileIcon(ChatbotStudent.Models.DocumentType type) => type switch
+    {
+        ChatbotStudent.Models.DocumentType.PDF => "bi-file-earmark-pdf text-danger",
+        ChatbotStudent.Models.DocumentType.DOCX => "bi-file-earmark-word text-primary",
+        ChatbotStudent.Models.DocumentType.PPTX => "bi-file-earmark-slides text-warning",
+        _ => "bi-file-earmark"
+    };
+
+    string GetStatusText(ChatbotStudent.Models.ProcessingStatus status) => status switch
+    {
+        ChatbotStudent.Models.ProcessingStatus.Completed => "✓ Hoàn thành",
+        ChatbotStudent.Models.ProcessingStatus.Processing => "⏳ Đang xử lý",
+        ChatbotStudent.Models.ProcessingStatus.Failed => "✕ Thất bại",
+        _ => "⏳ Chờ xử lý"
+    };
+}
+
+@section Scripts {
+    <script>
+        App.initUploadZone();
+
+        async function viewChunks(documentId, fileName) {
+            document.getElementById('chunksModalDocName').textContent = fileName;
+            document.getElementById('chunksModalBody').innerHTML = `
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Đang tải chunks...</p>
+                </div>
+            `;
+
+            var modal = new bootstrap.Modal(document.getElementById('chunksModal'));
+            modal.show();
+
+            try {
+                var response = await fetch('/Documents?handler=ChunksJson&documentId=' + documentId, {
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Lỗi ' + response.status);
+                }
+
+                var chunks = await response.json();
+                renderChunks(chunks);
+            } catch (err) {
+                document.getElementById('chunksModalBody').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        Không thể tải chunks: ${err.message}
+                    </div>
+                `;
+            }
+        }
+
+        function renderChunks(chunks) {
+            if (!chunks || chunks.length === 0) {
+                document.getElementById('chunksModalBody').innerHTML = `
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                        <p>Không có chunks nào.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            var html = `
+                <div class="mb-3">
+                    <span class="badge bg-primary fs-6">Tổng số: ${chunks.length} chunks</span>
+                </div>
+                <div class="accordion" id="chunksAccordion">
+            `;
+
+            chunks.forEach(function(chunk, index) {
+                var collapsed = index !== 0 ? 'collapsed' : '';
+                var show = index === 0 ? 'show' : '';
+                var contentPreview = chunk.content.length > 200
+                    ? chunk.content.substring(0, 200) + '...'
+                    : chunk.content;
+
+                html += `
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button ${collapsed}" type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#chunk${chunk.id}">
+                                <div class="d-flex w-100 justify-content-between align-items-center me-3">
+                                    <div>
+                                        <strong>Chunk #${chunk.position}</strong>
+                                        <span class="ms-2 badge bg-secondary">${chunk.tokenCount} tokens</span>
+                                        ${chunk.chunkingStrategy ? `<span class="ms-1 badge bg-info">${chunk.chunkingStrategy}</span>` : ''}
+                                        ${chunk.embeddingModel ? `<span class="ms-1 badge bg-warning text-dark">${chunk.embeddingModel}</span>` : ''}
+                                    </div>
+                                    <small class="text-muted">ID: ${chunk.id}</small>
+                                </div>
+                            </button>
+                        </h2>
+                        <div id="chunk${chunk.id}" class="accordion-collapse collapse ${show}"
+                             data-bs-parent="#chunksAccordion">
+                            <div class="accordion-body">
+                                <pre class="chunk-content-pre">${escapeHtml(chunk.content)}</pre>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            document.getElementById('chunksModalBody').innerHTML = html;
+        }
+
+        function escapeHtml(text) {
+            var div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+}

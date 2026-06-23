@@ -1,0 +1,62 @@
+@page
+@model ChatbotStudent.Pages.Admin.SettingsModel
+@{
+    ViewData["Title"] = "Cấu hình hệ thống";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold mb-0"><i class="bi bi-gear-wide-connected me-2"></i>Cấu hình hệ thống</h4>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @Model.SuccessMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            @Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <form method="post" asp-page-handler="Save">
+        @foreach (var category in Model.Configs.GroupBy(c => c.Category))
+        {
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-tag me-1"></i> @category.Key
+                </div>
+                <div class="card-body">
+                    @foreach (var config in category)
+                    {
+                        <div class="mb-3 row align-items-center">
+                            <label class="col-md-5 col-form-label fw-semibold">
+                                @config.Key
+                                <small class="d-block text-muted fw-normal">@config.Description</small>
+                            </label>
+                            <div class="col-md-7">
+                                <input type="hidden" name="keys" value="@config.Key" />
+                                <input type="text" name="values" class="form-control" value="@config.Value" />
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-lg me-1"></i> Lưu cấu hình
+            </button>
+            <button type="submit" class="btn btn-outline-secondary" formaction="/Admin/Settings?handler=Reset">
+                <i class="bi bi-arrow-counterclockwise me-1"></i> Khôi phục mặc định
+            </button>
+        </div>
+    </form>
+</div>

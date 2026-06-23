@@ -1,0 +1,144 @@
+@page
+@model ChatbotStudent.Pages.IndexModel
+@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm bg-gradient-primary text-white p-4" style="border-radius:var(--radius-lg)">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h2 class="fw-bold mb-2"><i class="bi bi-robot me-2"></i>AI Chatbot Sinh Viên</h2>
+                        <p class="mb-0 opacity-75">Hệ thống hỏi đáp tài liệu môn học sử dụng RAG (Retrieval Augmented Generation). Upload tài liệu, đặt câu hỏi, và nhận câu trả lời chính xác kèm trích dẫn nguồn.</p>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                        <a href="/Chat" class="btn btn-light btn-lg me-2"><i class="bi bi-chat-dots me-1"></i> Bắt đầu Chat</a>
+                        <a href="/Documents" class="btn btn-outline-light btn-lg"><i class="bi bi-upload me-1"></i> Upload</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.RegistrationSuccessMessage))
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="alert alert-success border-0 shadow-sm" style="border-radius:var(--radius-lg)">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-check-circle-fill fs-3 text-success"></i>
+                        <div>
+                            <strong>@Model.RegistrationSuccessMessage</strong><br />
+                            <span class="text-muted">Tài khoản của bạn đang chờ admin duyệt. Bạn sẽ nhận được thông báo khi tài khoản được kích hoạt.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 col-6">
+            <div class="stat-card card">
+                <div class="stat-value text-primary">@Model.CourseCount</div>
+                <div class="stat-label">Môn học</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stat-card card green">
+                <div class="stat-value text-success">@Model.DocumentCount</div>
+                <div class="stat-label">Tài liệu</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stat-card card blue">
+                <div class="stat-value text-info">@Model.ChunkCount</div>
+                <div class="stat-label">Chunks đã index</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stat-card card amber">
+                <div class="stat-value" style="color:var(--accent)">@Model.SessionCount</div>
+                <div class="stat-label">Phiên chat</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feature cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3"><i class="bi bi-cloud-arrow-up text-primary" style="font-size:2.5rem"></i></div>
+                    <h5>Quản lý tài liệu</h5>
+                    <p class="text-muted">Upload PDF, DOCX, PowerPoint. Tự động chunk & embed tài liệu theo nhiều chiến lược.</p>
+                    <a href="/Documents" class="btn btn-outline-primary btn-sm">Xem tài liệu →</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3"><i class="bi bi-chat-left-text text-success" style="font-size:2.5rem"></i></div>
+                    <h5>Chat & Hỏi đáp</h5>
+                    <p class="text-muted">Trò chuyện tự nhiên với AI, nhận câu trả lời kèm trích dẫn nguồn tài liệu gốc.</p>
+                    <a href="/Chat" class="btn btn-outline-success btn-sm">Bắt đầu chat →</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3"><i class="bi bi-bar-chart-line text-warning" style="font-size:2.5rem"></i></div>
+                    <h5>Nghiên cứu RAG</h5>
+                    <p class="text-muted">Benchmark RAG vs Fine-tuning, so sánh chunking strategies & embedding models.</p>
+                    <a href="/Research" class="btn btn-outline-warning btn-sm">Xem kết quả →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Architecture diagram -->
+    <div class="card">
+        <div class="card-header"><i class="bi bi-diagram-3 me-2"></i>Kiến trúc hệ thống</div>
+        <div class="card-body">
+            <div class="row text-center">
+                <div class="col-md-2 mb-2">
+                    <div class="p-3 bg-light rounded">
+                        <i class="bi bi-file-earmark text-primary fs-3"></i>
+                        <div class="small fw-bold mt-1">Upload</div>
+                        <div class="small text-muted">PDF/DOCX/PPTX</div>
+                    </div>
+                </div>
+                <div class="col-md-1 d-flex align-items-center justify-content-center"><i class="bi bi-arrow-right fs-4 text-muted"></i></div>
+                <div class="col-md-2 mb-2">
+                    <div class="p-3 bg-light rounded">
+                        <i class="bi bi-scissors text-info fs-3"></i>
+                        <div class="small fw-bold mt-1">Chunking</div>
+                        <div class="small text-muted">4 strategies</div>
+                    </div>
+                </div>
+                <div class="col-md-1 d-flex align-items-center justify-content-center"><i class="bi bi-arrow-right fs-4 text-muted"></i></div>
+                <div class="col-md-2 mb-2">
+                    <div class="p-3 bg-light rounded">
+                        <i class="bi bi-hdd-stack text-success fs-3"></i>
+                        <div class="small fw-bold mt-1">Embedding</div>
+                        <div class="small text-muted">4 models</div>
+                    </div>
+                </div>
+                <div class="col-md-1 d-flex align-items-center justify-content-center"><i class="bi bi-arrow-right fs-4 text-muted"></i></div>
+                <div class="col-md-2 mb-2">
+                    <div class="p-3 bg-light rounded">
+                        <i class="bi bi-chat-dots text-warning fs-3"></i>
+                        <div class="small fw-bold mt-1">RAG Chat</div>
+                        <div class="small text-muted">SignalR</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

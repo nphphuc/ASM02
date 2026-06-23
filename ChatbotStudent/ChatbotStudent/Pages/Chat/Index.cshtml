@@ -1,0 +1,278 @@
+@page
+@model ChatbotStudent.Pages.Chat.IndexModel
+@{
+    ViewData["Title"] = "Chat";
+}
+
+<div class="container-fluid">
+    <div class="chat-container">
+        <!-- Sidebar: Sessions -->
+        <div class="chat-sidebar">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0"><i class="bi bi-chat-left-text me-1"></i> Phiên chat</h6>
+            </div>
+
+            <div class="mb-3">
+                <select class="form-select form-select-sm" id="courseSelect" onchange="onCourseChange(this.value)">
+                    <option value="">-- Chọn môn học --</option>
+                    @foreach (var c in Model.Courses)
+                    {
+                        <option value="@c.Id" selected="@(Model.SelectedCourseId == c.Id)">@c.Name</option>
+                    }
+                </select>
+            </div>
+
+            <button class="btn btn-primary btn-sm w-100 mb-3" onclick="createNewSession()" id="newSessionBtn" @(Model.SelectedCourseId == null ? "disabled" : "")>
+                <i class="bi bi-plus-lg me-1"></i> Phiên mới
+            </button>
+
+            <div id="sessionList">
+                @foreach (var session in Model.Sessions)
+                {
+                    <div class="session-item @(session.Id == Model.CurrentSessionId ? "active" : "")"
+                         onclick="window.location.href='/Chat?sessionId=@session.Id'">
+                        <div class="text-truncate fw-medium">@session.Title</div>
+                        <div class="session-time">
+                            @(session.LastMessageAt?.ToString("dd/MM HH:mm") ?? session.StartedAt.ToString("dd/MM HH:mm"))
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="chat-main">
+            @if (Model.SelectedCourseId.HasValue)
+            {
+                <!-- Messages area -->
+                <div class="chat-messages" id="chatMessages">
+                    @if (Model.CurrentSessionId.HasValue && Model.Messages.Any())
+                    {
+                        @foreach (var msg in Model.Messages)
+                        {
+                            var isUser = msg.Role == ChatbotStudent.Models.MessageRole.User;
+                            var avatar = isUser ? "<i class=\"bi bi-person-fill\"></i>" : "<i class=\"bi bi-robot\"></i>";
+                            var sources = msg.SourcesJson != null
+                                ? System.Text.Json.JsonSerializer.Deserialize<List<ChatbotStudent.Services.SourceReference>>(msg.SourcesJson)
+                                : null;
+
+                            <div class="message @(isUser ? "user" : "assistant")">
+                                <div class="message-avatar">@Html.Raw(avatar)</div>
+                                <div>
+                                    <div class="message-bubble">@Html.Raw(msg.Content.Replace("\n", "<br>"))</div>
+                                    @if (sources != null && sources.Any())
+                                    {
+                                        <div class="sources-panel mt-2">
+                                            <strong><i class="bi bi-link-45deg"></i> Nguồn:</strong>
+                                            @foreach (var s in sources)
+                                            {
+                                                <div class="source-item">
+                                                    <span class="source-score">@((s.Score * 100).ToString("F0"))%</span>
+                                                    <span>@s.DocumentName (chunk #@s.ChunkPosition)</span>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    @if (msg.ResponseTimeMs.HasValue)
+                                    {
+                                        <div class="message-meta"><i class="bi bi-clock"></i> @msg.ResponseTimeMs ms</div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted mt-auto mb-auto">
+                            <i class="bi bi-chat-dots fs-1 d-block mb-2"></i>
+                            <p>Hãy đặt câu hỏi về tài liệu môn <strong>@Model.Courses.FirstOrDefault(c => c.Id == Model.SelectedCourseId)?.Name</strong></p>
+                            <p class="small">AI sẽ trả lời dựa trên tài liệu đã được index và trích dẫn nguồn.</p>
+                        </div>
+                    }
+
+                    <!-- Typing indicator -->
+                    <div class="message assistant" id="typingIndicator" style="display:none">
+                        <div class="message-avatar"><i class="bi bi-robot"></i></div>
+                        <div class="typing-indicator">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="chat-input-area">
+                    <div class="chat-input-wrapper">
+                        <textarea id="chatInput" class="form-control" rows="1"
+                                  placeholder="Nhập câu hỏi của bạn về môn học này..."
+                                  onkeydown="onChatKeydown(event)"></textarea>
+                        <button class="btn btn-primary px-3" onclick="onSendClick()" id="sendBtn">
+                            <i class="bi bi-send"></i>
+                        </button>
+                    </div>
+                    <div id="chatError" class="text-danger small mt-1" style="display:none"></div>
+                </div>
+                @Html.AntiForgeryToken()
+            }
+            else
+            {
+                <div class="text-center mt-auto mb-auto p-5">
+                    <i class="bi bi-chat-dots text-muted" style="font-size:5rem; opacity:.3"></i>
+                    <h3 class="mt-4 text-muted">Chào mừng bạn đến với AI Chatbot!</h3>
+                    <p class="text-muted mb-4">Chọn một môn học ở sidebar bên trái để bắt đầu trò chuyện.</p>
+                    @if (Model.Courses.Any())
+                    {
+                        <select class="form-select w-auto mx-auto" style="max-width:300px" onchange="if(this.value) window.location.href='/Chat?courseId='+this.value">
+                            <option value="">-- Chọn môn học --</option>
+                            @foreach (var c in Model.Courses)
+                            {
+                                <option value="@c.Id">@c.Name (@c.Code)</option>
+                            }
+                        </select>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning d-inline-block">
+                            <i class="bi bi-info-circle me-1"></i> Bạn chưa được ghi danh vào môn học nào.
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Biến lưu sessionId hiện tại
+        var currentSessionId = @(Model.CurrentSessionId.HasValue ? Model.CurrentSessionId.Value.ToString() : "null");
+        var selectedCourseId = @(Model.SelectedCourseId.HasValue ? Model.SelectedCourseId.Value.ToString() : "null");
+
+        // Lấy nội dung tin nhắn từ URL (nếu có) — do auto-create session gửi kèm
+        var urlParams = new URLSearchParams(window.location.search);
+        var pendingMessage = urlParams.get('q') || '';
+
+        // Khởi tạo SignalR nếu có session
+        @if (Model.CurrentSessionId.HasValue)
+        {
+            <text>
+            App.initChat(@Model.CurrentSessionId.Value);
+            App.initAutoResize();
+
+            // Nếu có tin nhắn đang chờ từ URL, tự động gửi sau khi SignalR kết nối
+            if (pendingMessage) {
+                var checkInterval = setInterval(function() {
+                    if (App.connection && App.connection.state === signalR.HubConnectionState.Connected) {
+                        clearInterval(checkInterval);
+                        document.getElementById('chatInput').value = pendingMessage;
+                        App.sendMessage();
+                    }
+                }, 200);
+                // Timeout sau 10 giây
+                setTimeout(function() { clearInterval(checkInterval); }, 10000);
+            }
+            </text>
+        }
+        else
+        {
+            <text>
+            App.initAutoResize();
+            </text>
+        }
+
+        function onCourseChange(courseId) {
+            if (courseId) {
+                window.location.href = '/Chat?courseId=' + courseId;
+            }
+        }
+
+        function onChatKeydown(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage();
+            }
+        }
+
+        function onSendClick() {
+            handleSendMessage();
+        }
+
+        function showError(msg) {
+            var el = document.getElementById('chatError');
+            if (el) { el.textContent = msg; el.style.display = 'block'; }
+        }
+        function hideError() {
+            var el = document.getElementById('chatError');
+            if (el) { el.textContent = ''; el.style.display = 'none'; }
+        }
+
+        async function handleSendMessage() {
+            hideError();
+            var input = document.getElementById('chatInput');
+            var message = input.value.trim();
+            if (!message) return;
+
+            if (currentSessionId) {
+                // Đã có session -> gửi qua SignalR
+                App.sendMessage();
+            } else {
+                // Chưa có session -> tạo session trước
+                try {
+                    input.disabled = true;
+                    var token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+                    var response = await fetch('/Chat?handler=CreateSession', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'RequestVerificationToken': token
+                        },
+                        body: 'courseId=' + selectedCourseId
+                    });
+
+                    if (!response.ok) {
+                        showError('Không thể tạo phiên chat. Vui lòng thử lại (lỗi ' + response.status + ').');
+                        input.disabled = false;
+                        return;
+                    }
+
+                    var data = await response.json();
+                    if (data.sessionId) {
+                        // Chuyển đến session mới, kèm nội dung tin nhắn qua param 'q'
+                        window.location.href = '/Chat?sessionId=' + data.sessionId + '&q=' + encodeURIComponent(message);
+                    }
+                } catch (err) {
+                    console.error('Failed to create session:', err);
+                    showError('Lỗi kết nối: ' + err.message);
+                    input.disabled = false;
+                }
+            }
+        }
+
+        async function createNewSession() {
+            hideError();
+            var courseId = document.getElementById('courseSelect').value;
+            if (!courseId) {
+                showError('Vui lòng chọn môn học trước.');
+                return;
+            }
+
+            var token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+            var response = await fetch('/Chat?handler=CreateSession', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': token
+                },
+                body: 'courseId=' + courseId
+            });
+
+            if (response.ok) {
+                var data = await response.json();
+                if (data.sessionId) {
+                    window.location.href = '/Chat?sessionId=' + data.sessionId;
+                }
+            } else {
+                showError('Không thể tạo phiên chat (lỗi ' + response.status + ').');
+            }
+        }
+    </script>
+}

@@ -1,0 +1,279 @@
+@page
+@model ChatbotStudent.Pages.Research.IndexModel
+@{
+    ViewData["Title"] = "Nghiên cứu & Benchmark";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold mb-0"><i class="bi bi-graph-up me-2"></i>Nghiên cứu & Benchmark</h4>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#experimentModal">
+            <i class="bi bi-play-circle me-1"></i> Tạo Experiment mới
+        </button>
+    </div>
+
+    <!-- Course selector -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <select class="form-select" id="courseFilter" onchange="location.href='/Research?courseId='+this.value">
+                <option value="">-- Chọn môn học --</option>
+                @foreach (var c in Model.Courses)
+                {
+                    <option value="@c.Id" selected="@(Model.SelectedCourseId == c.Id)">@c.Name (@c.Code)</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    @if (Model.SelectedCourseId.HasValue)
+    {
+        @if (Model.Summaries.Any())
+        {
+            <!-- Summary Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">@(Model.Summaries.Average(s => s.AvgFaithfulness).ToString("F3"))</div>
+                        <div class="metric-label">Avg Faithfulness</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">@(Model.Summaries.Average(s => s.AvgAnswerRelevance).ToString("F3"))</div>
+                        <div class="metric-label">Avg Answer Relevance</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">@(Model.Summaries.Average(s => s.AvgContextPrecision).ToString("F3"))</div>
+                        <div class="metric-label">Avg Context Precision</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="metric-card">
+                        <div class="metric-value">@(Model.Summaries.Average(s => s.AvgContextRecall).ToString("F3"))</div>
+                        <div class="metric-label">Avg Context Recall</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparison Chart -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header"><i class="bi bi-bar-chart me-1"></i> RAGAS Metrics Comparison</div>
+                        <div class="card-body">
+                            <canvas id="metricsChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header"><i class="bi bi-pie-chart me-1"></i> Radar Comparison</div>
+                        <div class="card-body">
+                            <canvas id="radarChart" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Experiments Table -->
+            <div class="card mb-4">
+                <div class="card-header"><i class="bi bi-table me-1"></i> Kết quả Experiment</div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Tên Experiment</th>
+                                    <th>Loại</th>
+                                    <th>Embedding</th>
+                                    <th>Chunking</th>
+                                    <th>Approach</th>
+                                    <th>Faithfulness</th>
+                                    <th>Relevance</th>
+                                    <th>Precision</th>
+                                    <th>Recall</th>
+                                    <th>Thời gian TB</th>
+                                    <th>Số câu</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var s in Model.Summaries)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@s.ExperimentName</td>
+                                        <td><span class="badge bg-info">@s.Approach</span></td>
+                                        <td><code>@(s.EmbeddingModel ?? "-")</code></td>
+                                        <td><code>@(s.ChunkingStrategy ?? "-")</code></td>
+                                        <td>@(s.Approach ?? "-")</td>
+                                        <td><strong>@s.AvgFaithfulness.ToString("F3")</strong></td>
+                                        <td><strong>@s.AvgAnswerRelevance.ToString("F3")</strong></td>
+                                        <td><strong>@s.AvgContextPrecision.ToString("F3")</strong></td>
+                                        <td><strong>@s.AvgContextRecall.ToString("F3")</strong></td>
+                                        <td>@s.AvgResponseTimeMs.ToString("F0") ms</td>
+                                        <td>@s.TotalQuestions</td>
+                                        <td><span class="badge-status completed">✓ Hoàn thành</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="text-center p-5">
+                <i class="bi bi-bar-chart-line text-muted" style="font-size:4rem"></i>
+                <h4 class="mt-3 text-muted">Chưa có experiment nào</h4>
+                <p class="text-muted">Tạo experiment mới để bắt đầu benchmark RAG vs Fine-tuning.</p>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="text-center p-5">
+            <i class="bi bi-arrow-up text-muted" style="font-size:3rem"></i>
+            <h4 class="mt-3 text-muted">Chọn môn học để xem kết quả nghiên cứu</h4>
+        </div>
+    }
+</div>
+
+<!-- Create Experiment Modal -->
+<div class="modal fade" id="experimentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="RunExperiment">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-play-circle me-2"></i>Tạo Experiment mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="courseId" value="@Model.SelectedCourseId" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Tên Experiment</label>
+                        <input type="text" name="name" class="form-control" required
+                               placeholder="VD: Compare E5 vs OpenAI embeddings" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Loại Experiment</label>
+                        <select name="type" class="form-select" required onchange="updateFormFields(this.value)">
+                            <option value="RAG_VS_FINETUNING">RAG vs Fine-tuning</option>
+                            <option value="CHUNKING_STRATEGY">So sánh Chunking Strategy</option>
+                            <option value="EMBEDDING_MODEL">So sánh Embedding Model</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3" id="embeddingField">
+                        <label class="form-label fw-semibold">Embedding Model</label>
+                        <select name="embeddingModel" class="form-select">
+                            <option value="OpenAI">text-embedding-3-small (OpenAI)</option>
+                            <option value="multilingual-e5-base">multilingual-e5-base (HuggingFace)</option>
+                            <option value="bge-m3">bge-m3 (BAAI)</option>
+                            <option value="phobert">PhoBERT-base (VietAI)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3" id="chunkingField">
+                        <label class="form-label fw-semibold">Chunking Strategy</label>
+                        <select name="chunkingStrategy" class="form-select">
+                            <option value="Recursive">Recursive</option>
+                            <option value="FixedSize">FixedSize</option>
+                            <option value="SentenceBased">SentenceBased</option>
+                            <option value="ParagraphBased">ParagraphBased</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Approach</label>
+                        <select name="approach" class="form-select">
+                            <option value="RAG">RAG (Retrieval Augmented Generation)</option>
+                            <option value="FineTuned">Fine-tuned Model</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-play me-1"></i> Chạy Experiment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updateFormFields(type) {
+            var embeddingField = document.getElementById('embeddingField');
+            var chunkingField = document.getElementById('chunkingField');
+            embeddingField.style.display = (type === 'RAG_VS_FINETUNING' || type === 'EMBEDDING_MODEL') ? 'block' : 'none';
+            chunkingField.style.display = (type === 'RAG_VS_FINETUNING' || type === 'CHUNKING_STRATEGY') ? 'block' : 'none';
+        }
+
+        @if (Model.Summaries.Any())
+        {
+            var labels = System.Text.Json.JsonSerializer.Serialize(Model.Summaries.Select(s => s.ExperimentName));
+            var faithfulness = System.Text.Json.JsonSerializer.Serialize(Model.Summaries.Select(s => s.AvgFaithfulness));
+            var relevance = System.Text.Json.JsonSerializer.Serialize(Model.Summaries.Select(s => s.AvgAnswerRelevance));
+            var precision = System.Text.Json.JsonSerializer.Serialize(Model.Summaries.Select(s => s.AvgContextPrecision));
+            var recall = System.Text.Json.JsonSerializer.Serialize(Model.Summaries.Select(s => s.AvgContextRecall));
+
+            <text>
+            // Bar Chart
+            var barCtx = document.getElementById('metricsChart').getContext('2d');
+            new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: @labels,
+                    datasets: [
+                        { label: 'Faithfulness', data: @faithfulness, backgroundColor: 'rgba(79,70,229,.7)' },
+                        { label: 'Answer Relevance', data: @relevance, backgroundColor: 'rgba(14,165,233,.7)' },
+                        { label: 'Context Precision', data: @precision, backgroundColor: 'rgba(34,197,94,.7)' },
+                        { label: 'Context Recall', data: @recall, backgroundColor: 'rgba(245,158,11,.7)' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: { y: { beginAtZero: true, max: 1 } },
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            // Radar Chart
+            var radarCtx = document.getElementById('radarChart').getContext('2d');
+            var radarColors = ['rgba(79,70,229,.3)', 'rgba(14,165,233,.3)', 'rgba(34,197,94,.3)', 'rgba(245,158,11,.3)'];
+            var radarBorders = ['rgba(79,70,229,1)', 'rgba(14,165,233,1)', 'rgba(34,197,94,1)', 'rgba(245,158,11,1)'];
+            var radarData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                Model.Summaries.Select((s, i) => new {
+                    label = s.ExperimentName,
+                    data = new[] { s.AvgFaithfulness, s.AvgAnswerRelevance, s.AvgContextPrecision, s.AvgContextRecall }
+                })
+            ));
+            radarData.forEach(function(d, i) {
+                d.backgroundColor = radarColors[i % radarColors.length];
+                d.borderColor = radarBorders[i % radarBorders.length];
+                d.borderWidth = 2;
+                d.pointRadius = 4;
+            });
+            new Chart(radarCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Faithfulness', 'Answer Relevance', 'Context Precision', 'Context Recall'],
+                    datasets: radarData
+                },
+                options: {
+                    responsive: true,
+                    scales: { r: { beginAtZero: true, max: 1, ticks: { stepSize: 0.2 } } },
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+            </text>
+        }
+    </script>
+}
