@@ -3,6 +3,42 @@
   "WorkspaceRootPath": "C:\\Users\\HP\\Desktop\\ASM02\\ChatbotStudent\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{5DE1DC6E-94A6-C872-E55F-D03D157B2AB4}|ChatbotStudent.Business\\ChatbotStudent.Business.csproj|c:\\users\\hp\\desktop\\asm02\\chatbotstudent\\chatbotstudent.business\\services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5DE1DC6E-94A6-C872-E55F-D03D157B2AB4}|ChatbotStudent.Business\\ChatbotStudent.Business.csproj|solutionrelative:chatbotstudent.business\\services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DE1DC6E-94A6-C872-E55F-D03D157B2AB4}|ChatbotStudent.Business\\ChatbotStudent.Business.csproj|c:\\users\\hp\\desktop\\asm02\\chatbotstudent\\chatbotstudent.business\\services\\systemconfigservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5DE1DC6E-94A6-C872-E55F-D03D157B2AB4}|ChatbotStudent.Business\\ChatbotStudent.Business.csproj|solutionrelative:chatbotstudent.business\\services\\systemconfigservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DE1DC6E-94A6-C872-E55F-D03D157B2AB4}|ChatbotStudent.Business\\ChatbotStudent.Business.csproj|c:\\users\\hp\\desktop\\asm02\\chatbotstudent\\chatbotstudent.business\\services\\serviceoptions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5DE1DC6E-94A6-C872-E55F-D03D157B2AB4}|ChatbotStudent.Business\\ChatbotStudent.Business.csproj|solutionrelative:chatbotstudent.business\\services\\serviceoptions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DE1DC6E-94A6-C872-E55F-D03D157B2AB4}|ChatbotStudent.Business\\ChatbotStudent.Business.csproj|c:\\users\\hp\\desktop\\asm02\\chatbotstudent\\chatbotstudent.business\\services\\seeddata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5DE1DC6E-94A6-C872-E55F-D03D157B2AB4}|ChatbotStudent.Business\\ChatbotStudent.Business.csproj|solutionrelative:chatbotstudent.business\\services\\seeddata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DE1DC6E-94A6-C872-E55F-D03D157B2AB4}|ChatbotStudent.Business\\ChatbotStudent.Business.csproj|c:\\users\\hp\\desktop\\asm02\\chatbotstudent\\chatbotstudent.business\\services\\ragservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5DE1DC6E-94A6-C872-E55F-D03D157B2AB4}|ChatbotStudent.Business\\ChatbotStudent.Business.csproj|solutionrelative:chatbotstudent.business\\services\\ragservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DE1DC6E-94A6-C872-E55F-D03D157B2AB4}|ChatbotStudent.Business\\ChatbotStudent.Business.csproj|c:\\users\\hp\\desktop\\asm02\\chatbotstudent\\chatbotstudent.business\\services\\otpservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5DE1DC6E-94A6-C872-E55F-D03D157B2AB4}|ChatbotStudent.Business\\ChatbotStudent.Business.csproj|solutionrelative:chatbotstudent.business\\services\\otpservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DE1DC6E-94A6-C872-E55F-D03D157B2AB4}|ChatbotStudent.Business\\ChatbotStudent.Business.csproj|c:\\users\\hp\\desktop\\asm02\\chatbotstudent\\chatbotstudent.business\\services\\openaiembeddingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5DE1DC6E-94A6-C872-E55F-D03D157B2AB4}|ChatbotStudent.Business\\ChatbotStudent.Business.csproj|solutionrelative:chatbotstudent.business\\services\\openaiembeddingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DE1DC6E-94A6-C872-E55F-D03D157B2AB4}|ChatbotStudent.Business\\ChatbotStudent.Business.csproj|c:\\users\\hp\\desktop\\asm02\\chatbotstudent\\chatbotstudent.business\\services\\openaichatclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5DE1DC6E-94A6-C872-E55F-D03D157B2AB4}|ChatbotStudent.Business\\ChatbotStudent.Business.csproj|solutionrelative:chatbotstudent.business\\services\\openaichatclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5DE1DC6E-94A6-C872-E55F-D03D157B2AB4}|ChatbotStudent.Business\\ChatbotStudent.Business.csproj|c:\\users\\hp\\desktop\\asm02\\chatbotstudent\\chatbotstudent.business\\services\\localembeddingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5DE1DC6E-94A6-C872-E55F-D03D157B2AB4}|ChatbotStudent.Business\\ChatbotStudent.Business.csproj|solutionrelative:chatbotstudent.business\\services\\localembeddingservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{9562893F-7353-DD50-7C31-30BE6881FF27}|ChatbotStudent\\ChatbotStudent.csproj|c:\\users\\hp\\desktop\\asm02\\chatbotstudent\\chatbotstudent\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{9562893F-7353-DD50-7C31-30BE6881FF27}|ChatbotStudent\\ChatbotStudent.csproj|solutionrelative:chatbotstudent\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
@@ -23,6 +59,123 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "UserService.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\Desktop\\ASM02\\ChatbotStudent\\ChatbotStudent.Business\\Services\\UserService.cs",
+              "RelativeDocumentMoniker": "ChatbotStudent.Business\\Services\\UserService.cs",
+              "ToolTip": "C:\\Users\\HP\\Desktop\\ASM02\\ChatbotStudent\\ChatbotStudent.Business\\Services\\UserService.cs",
+              "RelativeToolTip": "ChatbotStudent.Business\\Services\\UserService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-23T16:16:19.703Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "SystemConfigService.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\Desktop\\ASM02\\ChatbotStudent\\ChatbotStudent.Business\\Services\\SystemConfigService.cs",
+              "RelativeDocumentMoniker": "ChatbotStudent.Business\\Services\\SystemConfigService.cs",
+              "ToolTip": "C:\\Users\\HP\\Desktop\\ASM02\\ChatbotStudent\\ChatbotStudent.Business\\Services\\SystemConfigService.cs",
+              "RelativeToolTip": "ChatbotStudent.Business\\Services\\SystemConfigService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAADwvwAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-23T16:16:18.86Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ServiceOptions.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\Desktop\\ASM02\\ChatbotStudent\\ChatbotStudent.Business\\Services\\ServiceOptions.cs",
+              "RelativeDocumentMoniker": "ChatbotStudent.Business\\Services\\ServiceOptions.cs",
+              "ToolTip": "C:\\Users\\HP\\Desktop\\ASM02\\ChatbotStudent\\ChatbotStudent.Business\\Services\\ServiceOptions.cs",
+              "RelativeToolTip": "ChatbotStudent.Business\\Services\\ServiceOptions.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAADwvwAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-23T16:16:18.146Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "SeedData.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\Desktop\\ASM02\\ChatbotStudent\\ChatbotStudent.Business\\Services\\SeedData.cs",
+              "RelativeDocumentMoniker": "ChatbotStudent.Business\\Services\\SeedData.cs",
+              "ToolTip": "C:\\Users\\HP\\Desktop\\ASM02\\ChatbotStudent\\ChatbotStudent.Business\\Services\\SeedData.cs",
+              "RelativeToolTip": "ChatbotStudent.Business\\Services\\SeedData.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAADwvwAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-23T16:16:16.686Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "RagService.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\Desktop\\ASM02\\ChatbotStudent\\ChatbotStudent.Business\\Services\\RagService.cs",
+              "RelativeDocumentMoniker": "ChatbotStudent.Business\\Services\\RagService.cs",
+              "ToolTip": "C:\\Users\\HP\\Desktop\\ASM02\\ChatbotStudent\\ChatbotStudent.Business\\Services\\RagService.cs",
+              "RelativeToolTip": "ChatbotStudent.Business\\Services\\RagService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAADwvwAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-23T16:16:15.805Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "OtpService.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\Desktop\\ASM02\\ChatbotStudent\\ChatbotStudent.Business\\Services\\OtpService.cs",
+              "RelativeDocumentMoniker": "ChatbotStudent.Business\\Services\\OtpService.cs",
+              "ToolTip": "C:\\Users\\HP\\Desktop\\ASM02\\ChatbotStudent\\ChatbotStudent.Business\\Services\\OtpService.cs",
+              "RelativeToolTip": "ChatbotStudent.Business\\Services\\OtpService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAADwvwAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-23T16:16:10.675Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "OpenAIEmbeddingService.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\Desktop\\ASM02\\ChatbotStudent\\ChatbotStudent.Business\\Services\\OpenAIEmbeddingService.cs",
+              "RelativeDocumentMoniker": "ChatbotStudent.Business\\Services\\OpenAIEmbeddingService.cs",
+              "ToolTip": "C:\\Users\\HP\\Desktop\\ASM02\\ChatbotStudent\\ChatbotStudent.Business\\Services\\OpenAIEmbeddingService.cs",
+              "RelativeToolTip": "ChatbotStudent.Business\\Services\\OpenAIEmbeddingService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAADwvwAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-23T16:16:09.627Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "OpenAiChatClient.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\Desktop\\ASM02\\ChatbotStudent\\ChatbotStudent.Business\\Services\\OpenAiChatClient.cs",
+              "RelativeDocumentMoniker": "ChatbotStudent.Business\\Services\\OpenAiChatClient.cs",
+              "ToolTip": "C:\\Users\\HP\\Desktop\\ASM02\\ChatbotStudent\\ChatbotStudent.Business\\Services\\OpenAiChatClient.cs",
+              "RelativeToolTip": "ChatbotStudent.Business\\Services\\OpenAiChatClient.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAADwvwAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-23T16:16:06.366Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "LocalEmbeddingService.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\Desktop\\ASM02\\ChatbotStudent\\ChatbotStudent.Business\\Services\\LocalEmbeddingService.cs",
+              "RelativeDocumentMoniker": "ChatbotStudent.Business\\Services\\LocalEmbeddingService.cs",
+              "ToolTip": "C:\\Users\\HP\\Desktop\\ASM02\\ChatbotStudent\\ChatbotStudent.Business\\Services\\LocalEmbeddingService.cs",
+              "RelativeToolTip": "ChatbotStudent.Business\\Services\\LocalEmbeddingService.cs",
+              "ViewState": "AgIAACwAAAAAAAAAAAAwwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-23T16:15:52.238Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\HP\\Desktop\\ASM02\\ChatbotStudent\\ChatbotStudent\\appsettings.json",
               "RelativeDocumentMoniker": "ChatbotStudent\\appsettings.json",
@@ -35,7 +188,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 10,
               "Title": "CourseDetail.cshtml.cs",
               "DocumentMoniker": "C:\\Users\\HP\\Desktop\\ASM02\\ChatbotStudent\\ChatbotStudent\\Pages\\Admin\\CourseDetail.cshtml.cs",
               "RelativeDocumentMoniker": "ChatbotStudent\\Pages\\Admin\\CourseDetail.cshtml.cs",
