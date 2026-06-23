@@ -29,6 +29,21 @@ public class UsersModel : PageModel
     {
         Users = await _userService.GetAllUsersAsync();
         PendingUsers = await _userService.GetPendingUsersAsync();
+
+        // Read messages persisted across redirect via TempData
+        if (TempData["SuccessMessage"] is string sm)
+            SuccessMessage = sm;
+        if (TempData["ErrorMessage"] is string em)
+            ErrorMessage = em;
+        if (TempData["BulkResult"] is string br && !string.IsNullOrEmpty(br))
+        {
+            try
+            {
+                var opt = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                BulkResult = System.Text.Json.JsonSerializer.Deserialize<BulkCreateResult>(br, opt);
+            }
+            catch { }
+        }
     }
 
     public async Task<IActionResult> OnPostCreateUserAsync(
@@ -50,7 +65,7 @@ public class UsersModel : PageModel
                 await _userService.CreateUserWithDetailsAsync(
                     email.Trim(), password, fullName.Trim(), userRole,
                     universityName?.Trim() ?? "", null, null, null);
-                SuccessMessage = $"Đã tạo admin {fullName} thành công.";
+                TempData["SuccessMessage"] = $"Đã tạo admin {fullName} thành công.";
             }
             else
             {
@@ -61,12 +76,12 @@ public class UsersModel : PageModel
                     string.IsNullOrWhiteSpace(studentCode) ? null : studentCode.Trim(),
                     string.IsNullOrWhiteSpace(lecturerCode) ? null : lecturerCode.Trim(),
                     string.IsNullOrWhiteSpace(title) ? null : title.Trim());
-                SuccessMessage = $"Đã tạo tài khoản {fullName} thành công. Email thông báo đã được gửi tới {email.Trim()}.";
+                TempData["SuccessMessage"] = $"Đã tạo tài khoản {fullName} thành công. Email thông báo đã được gửi tới {email.Trim()}.";
             }
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Lỗi: {ex.Message}";
+            TempData["ErrorMessage"] = $"Lỗi: {ex.Message}";
         }
 
         return RedirectToPage();
@@ -76,7 +91,7 @@ public class UsersModel : PageModel
     {
         if (files == null || files.Count == 0 || files[0].Length == 0)
         {
-            ErrorMessage = "Vui lòng chọn file Excel để upload.";
+            TempData["ErrorMessage"] = "Vui lòng chọn file Excel để upload.";
             return RedirectToPage();
         }
 
@@ -85,27 +100,31 @@ public class UsersModel : PageModel
 
         if (ext != ".xlsx" && ext != ".xls")
         {
-            ErrorMessage = "Chỉ hỗ trợ file Excel (.xlsx, .xls).";
+            TempData["ErrorMessage"] = "Chỉ hỗ trợ file Excel (.xlsx, .xls).";
             return RedirectToPage();
         }
 
         try
         {
             using var stream = file.OpenReadStream();
-            BulkResult = await _userService.BulkCreateUsersFromExcelAsync(stream, file.FileName);
+            var bulkResult = await _userService.BulkCreateUsersFromExcelAsync(stream, file.FileName);
 
-            if (BulkResult.SuccessCount > 0)
+            // Serialize BulkResult to TempData so it can be shown after redirect
+            var json = System.Text.Json.JsonSerializer.Serialize(bulkResult);
+            TempData["BulkResult"] = json;
+
+            if (bulkResult.SuccessCount > 0)
             {
-                SuccessMessage = $"Đã tạo thành công {BulkResult.SuccessCount} tài khoản. Email thông báo đã được gửi.";
+                TempData["SuccessMessage"] = $"Đã tạo thành công {bulkResult.SuccessCount} tài khoản. Email thông báo đã được gửi.";
             }
-            if (BulkResult.FailCount > 0)
+            if (bulkResult.FailCount > 0)
             {
-                ErrorMessage = $"Có {BulkResult.FailCount} tài khoản tạo thất bại.";
+                TempData["ErrorMessage"] = $"Có {bulkResult.FailCount} tài khoản tạo thất bại. Xem chi tiết bên dưới.";
             }
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Lỗi xử lý file: {ex.Message}";
+            TempData["ErrorMessage"] = $"Lỗi xử lý file: {ex.Message}";
             _logger.LogError(ex, "Error processing Excel upload");
         }
 
@@ -116,9 +135,9 @@ public class UsersModel : PageModel
     {
         var success = await _userService.ToggleUserActiveAsync(userId);
         if (!success)
-            ErrorMessage = "Không tìm thấy người dùng.";
+            TempData["ErrorMessage"] = "Không tìm thấy người dùng.";
         else
-            SuccessMessage = "Đã cập nhật trạng thái.";
+            TempData["SuccessMessage"] = "Đã cập nhật trạng thái.";
         return RedirectToPage();
     }
 
@@ -133,9 +152,9 @@ public class UsersModel : PageModel
 
         var success = await _userService.UpdateUserRoleAsync(userId, userRole);
         if (!success)
-            ErrorMessage = "Không tìm thấy người dùng.";
+            TempData["ErrorMessage"] = "Không tìm thấy người dùng.";
         else
-            SuccessMessage = "Đã đổi vai trò thành công.";
+            TempData["SuccessMessage"] = "Đã đổi vai trò thành công.";
         return RedirectToPage();
     }
 
@@ -143,9 +162,9 @@ public class UsersModel : PageModel
     {
         var success = await _userService.DeleteUserAsync(userId);
         if (!success)
-            ErrorMessage = "Không tìm thấy người dùng.";
+            TempData["ErrorMessage"] = "Không tìm thấy người dùng.";
         else
-            SuccessMessage = "Đã xóa người dùng.";
+            TempData["SuccessMessage"] = "Đã xóa người dùng.";
         return RedirectToPage();
     }
 
@@ -188,9 +207,9 @@ public class UsersModel : PageModel
     {
         var success = await _userService.ApproveUserAsync(userId);
         if (!success)
-            ErrorMessage = "Không tìm thấy người dùng.";
+            TempData["ErrorMessage"] = "Không tìm thấy người dùng.";
         else
-            SuccessMessage = "Đã duyệt tài khoản thành công.";
+            TempData["SuccessMessage"] = "Đã duyệt tài khoản thành công.";
         return RedirectToPage();
     }
 
@@ -198,15 +217,15 @@ public class UsersModel : PageModel
     {
         if (string.IsNullOrWhiteSpace(rejectionReason))
         {
-            ErrorMessage = "Vui lòng nhập lý do từ chối.";
+            TempData["ErrorMessage"] = "Vui lòng nhập lý do từ chối.";
             return RedirectToPage();
         }
 
         var success = await _userService.RejectUserAsync(userId, rejectionReason.Trim());
         if (!success)
-            ErrorMessage = "Không tìm thấy người dùng.";
+            TempData["ErrorMessage"] = "Không tìm thấy người dùng.";
         else
-            SuccessMessage = "Đã từ chối tài khoản.";
+            TempData["SuccessMessage"] = "Đã từ chối tài khoản.";
         return RedirectToPage();
     }
 }

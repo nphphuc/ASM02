@@ -41,6 +41,16 @@
         .form-label { font-weight: 500; font-size: .9rem; color: #475569; }
         .auth-footer { text-align: center; margin-top: 1.5rem; font-size: .9rem; color: #64748b; }
         .alert { border-radius: 12px; }
+        .password-wrapper { position: relative; }
+        .password-wrapper input.form-control { padding-right: 3rem !important; }
+        .password-toggle-btn {
+            position: absolute; right: 0.25rem; top: 50%; transform: translateY(-50%);
+            background: transparent; border: none; color: #9ca3af; cursor: pointer;
+            padding: 0.375rem 0.5rem; z-index: 5; line-height: 1; transition: color .15s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .password-toggle-btn:hover { color: var(--primary); }
+        .password-toggle-btn:focus { outline: none; box-shadow: none; }
     </style>
 </head>
 <body>
@@ -160,6 +170,30 @@
                     titleSelect.required = true;
                 }
             }
+
+            // ── Password Toggle ────────────────────────────
+            function initPwToggles() {
+                document.querySelectorAll('input[type="password"]').forEach(function(input) {
+                    if (input.closest('.password-wrapper')) return;
+                    var wrapper = document.createElement('div');
+                    wrapper.className = 'password-wrapper';
+                    input.parentNode.insertBefore(wrapper, input);
+                    wrapper.appendChild(input);
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'password-toggle-btn';
+                    btn.tabIndex = -1;
+                    btn.setAttribute('aria-label', 'Hiển thị/ẩn mật khẩu');
+                    btn.innerHTML = '<i class="bi bi-eye"></i>';
+                    btn.addEventListener('click', function() {
+                        var isPassword = input.type === 'password';
+                        input.type = isPassword ? 'text' : 'password';
+                        btn.innerHTML = isPassword ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
+                    });
+                    wrapper.appendChild(btn);
+                });
+            }
+            initPwToggles();
 
             roleSelect.addEventListener('change', toggleFields);
             titleSelect.addEventListener('change', handleTitleChange);

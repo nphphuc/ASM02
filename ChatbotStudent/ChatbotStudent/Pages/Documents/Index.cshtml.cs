@@ -62,10 +62,10 @@ public class IndexModel : PageModel
         int courseId, string? chapter, string chunkingStrategy, string embeddingModel,
         List<IFormFile> files)
     {
-        // Only Admin/Lecturer can upload
-        if (!User.IsInRole("Admin") && !User.IsInRole("Lecturer"))
+        // Only Lecturer can upload (Admin can view/manage but not upload)
+        if (!User.IsInRole("Lecturer"))
         {
-            TempData["Error"] = "Bạn không có quyền upload tài liệu.";
+            TempData["Error"] = "Chỉ giảng viên mới có quyền upload tài liệu.";
             return RedirectToPage();
         }
 
@@ -92,10 +92,9 @@ public class IndexModel : PageModel
 
             // Process through DocumentManagementService
             using var fileStream = file.OpenReadStream();
-            var role = User.IsInRole("Admin") ? "Admin" : "Lecturer";
             await _documentService.UploadDocumentAsync(
                 courseId, chapter, chunkingStrategy, embeddingModel,
-                file.FileName, file.Length, fileStream, role);
+                file.FileName, file.Length, fileStream, "Lecturer");
         }
 
         return RedirectToPage();
@@ -103,10 +102,10 @@ public class IndexModel : PageModel
 
     public async Task<IActionResult> OnPostDeleteAsync(int documentId)
     {
-        // Only Admin/Lecturer can delete
-        if (!User.IsInRole("Admin") && !User.IsInRole("Lecturer"))
+        // Only Lecturer can delete
+        if (!User.IsInRole("Lecturer"))
         {
-            TempData["Error"] = "Bạn không có quyền xóa tài liệu.";
+            TempData["Error"] = "Chỉ giảng viên mới có quyền xóa tài liệu.";
             return RedirectToPage();
         }
 
