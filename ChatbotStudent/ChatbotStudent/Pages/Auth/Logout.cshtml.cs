@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using ChatbotStudent.Models;
+using ChatbotStudent.Data.Models;
 
-namespace ChatbotStudent.Pages.Auth;
+namespace ChatbotStudent.Web.Pages.Auth;
 
 public class LogoutModel : PageModel
 {

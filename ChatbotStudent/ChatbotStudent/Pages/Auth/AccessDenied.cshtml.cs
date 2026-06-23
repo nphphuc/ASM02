@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace ChatbotStudent.Pages.Auth;
+namespace ChatbotStudent.Web.Pages.Auth;
 
 public class AccessDeniedModel : PageModel
 {

@@ -1,14 +1,13 @@
-using ChatbotStudent.Data;
+using ChatbotStudent.Business.Services;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 
-namespace ChatbotStudent.Pages;
+namespace ChatbotStudent.Web.Pages;
 
 public class IndexModel : PageModel
 {
-    private readonly AppDbContext _db;
+    private readonly IDashboardService _dashboardService;
 
-    public IndexModel(AppDbContext db) => _db = db;
+    public IndexModel(IDashboardService dashboardService) => _dashboardService = dashboardService;
 
     public int CourseCount { get; set; }
     public int DocumentCount { get; set; }
@@ -19,10 +18,11 @@ public class IndexModel : PageModel
 
     public async Task OnGetAsync()
     {
-        CourseCount = await _db.Courses.CountAsync();
-        DocumentCount = await _db.Documents.CountAsync();
-        ChunkCount = await _db.DocumentChunks.CountAsync();
-        SessionCount = await _db.ChatSessions.CountAsync();
+        var stats = await _dashboardService.GetStatsAsync();
+        CourseCount = stats.CourseCount;
+        DocumentCount = stats.DocumentCount;
+        ChunkCount = stats.ChunkCount;
+        SessionCount = stats.SessionCount;
 
         // Check for registration success message
         if (TempData.ContainsKey("RegistrationSuccess"))

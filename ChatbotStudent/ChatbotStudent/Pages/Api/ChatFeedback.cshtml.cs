@@ -1,21 +1,20 @@
-using ChatbotStudent.Data;
-using ChatbotStudent.Models;
+using ChatbotStudent.Data.Models;
+using ChatbotStudent.Business.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 
-namespace ChatbotStudent.Pages.Api;
+namespace ChatbotStudent.Web.Pages.Api;
 
 [Authorize]
 public class ChatFeedbackModel : PageModel
 {
-    private readonly AppDbContext _db;
+    private readonly IChatFeedbackService _feedbackService;
     private readonly ILogger<ChatFeedbackModel> _logger;
 
-    public ChatFeedbackModel(AppDbContext db, ILogger<ChatFeedbackModel> logger)
+    public ChatFeedbackModel(IChatFeedbackService feedbackService, ILogger<ChatFeedbackModel> logger)
     {
-        _db = db;
+        _feedbackService = feedbackService;
         _logger = logger;
     }
 
@@ -30,30 +29,8 @@ public class ChatFeedbackModel : PageModel
 
         var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
 
-        // Check if feedback already exists
-        var existing = await _db.ChatMessageFeedbacks
-            .FirstOrDefaultAsync(f => f.MessageId == messageId && f.UserId == userId);
+        await _feedbackService.SubmitFeedbackAsync(messageId, userId, (FeedbackType)feedbackValue, comment);
 
-        if (existing != null)
-        {
-            existing.Feedback = (FeedbackType)feedbackValue;
-            if (!string.IsNullOrEmpty(comment))
-                existing.Comment = comment;
-            existing.CreatedAt = DateTime.UtcNow;
-        }
-        else
-        {
-            _db.ChatMessageFeedbacks.Add(new ChatMessageFeedback
-            {
-                MessageId = messageId,
-                UserId = userId,
-                Feedback = (FeedbackType)feedbackValue,
-                Comment = comment,
-                CreatedAt = DateTime.UtcNow
-            });
-        }
-
-        await _db.SaveChangesAsync();
         return new JsonResult(new { success = true });
     }
 }

@@ -1,10 +1,10 @@
-using ChatbotStudent.Models;
-using ChatbotStudent.Services;
+using ChatbotStudent.Data.Models;
+using ChatbotStudent.Business.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace ChatbotStudent.Pages.Admin;
+namespace ChatbotStudent.Web.Pages.Admin;
 
 [Authorize(Roles = "Admin")]
 public class UsersModel : PageModel

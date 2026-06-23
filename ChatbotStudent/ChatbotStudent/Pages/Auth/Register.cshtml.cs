@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using ChatbotStudent.Models;
-using ChatbotStudent.Services;
+using ChatbotStudent.Data.Models;
+using ChatbotStudent.Business.Services;
 
-namespace ChatbotStudent.Pages.Auth;
+namespace ChatbotStudent.Web.Pages.Auth;
 
 public class RegisterModel : PageModel
 {

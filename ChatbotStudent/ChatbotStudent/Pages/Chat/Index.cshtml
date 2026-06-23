@@ -1,5 +1,5 @@
 @page
-@model ChatbotStudent.Pages.Chat.IndexModel
+@model ChatbotStudent.Web.Pages.Chat.IndexModel
 @{
     ViewData["Title"] = "Chat";
 }
@@ -50,10 +50,10 @@
                     {
                         @foreach (var msg in Model.Messages)
                         {
-                            var isUser = msg.Role == ChatbotStudent.Models.MessageRole.User;
+                            var isUser = msg.Role == ChatbotStudent.Data.Models.MessageRole.User;
                             var avatar = isUser ? "<i class=\"bi bi-person-fill\"></i>" : "<i class=\"bi bi-robot\"></i>";
                             var sources = msg.SourcesJson != null
-                                ? System.Text.Json.JsonSerializer.Deserialize<List<ChatbotStudent.Services.SourceReference>>(msg.SourcesJson)
+                                ? System.Text.Json.JsonSerializer.Deserialize<List<ChatbotStudent.Business.Services.SourceReference>>(msg.SourcesJson)
                                 : null;
 
                             <div class="message @(isUser ? "user" : "assistant")">

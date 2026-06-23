@@ -1,26 +1,24 @@
 using System.Text.Json;
-using ChatbotStudent.Data;
-using ChatbotStudent.Models;
-using ChatbotStudent.Services;
+using ChatbotStudent.Data.Models;
+using ChatbotStudent.Business.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 
-namespace ChatbotStudent.Pages.Chat;
+namespace ChatbotStudent.Web.Pages.Chat;
 
 [Authorize]
 public class IndexModel : PageModel
 {
-    private readonly AppDbContext _db;
     private readonly IChatService _chatService;
     private readonly IRagService _ragService;
+    private readonly ICourseService _courseService;
 
-    public IndexModel(AppDbContext db, IChatService chatService, IRagService ragService)
+    public IndexModel(IChatService chatService, IRagService ragService, ICourseService courseService)
     {
-        _db = db;
         _chatService = chatService;
         _ragService = ragService;
+        _courseService = courseService;
     }
 
     public List<Course> Courses { get; set; } = new();
@@ -36,22 +34,18 @@ public class IndexModel : PageModel
         var isAdmin = User.IsInRole("Admin");
         var isLecturer = User.IsInRole("Lecturer");
 
-        // Filter courses by role: Students see only enrolled courses, Lecturers see their courses, Admins see all
+        // Filter courses by role using ICourseService
         if (isAdmin)
         {
-            Courses = await _db.Courses.ToListAsync();
+            Courses = await _courseService.GetAllCoursesAsync();
         }
         else if (isLecturer)
         {
-            Courses = await _db.Courses.Where(c => c.LecturerId == userId).ToListAsync();
+            Courses = await _courseService.GetCoursesByLecturerAsync(userId);
         }
         else
         {
-            var enrolledCourseIds = await _db.CourseEnrollments
-                .Where(e => e.UserId == userId)
-                .Select(e => e.CourseId)
-                .ToListAsync();
-            Courses = await _db.Courses.Where(c => enrolledCourseIds.Contains(c.Id)).ToListAsync();
+            Courses = await _courseService.GetCoursesByUserRoleAsync(userId, "Student");
         }
 
         if (sessionId.HasValue)

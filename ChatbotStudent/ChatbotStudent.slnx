@@ -1,3 +1,5 @@
 <Solution>
+  <Project Path="ChatbotStudent.Business/ChatbotStudent.Business.csproj" />
+  <Project Path="ChatbotStudent.Data/ChatbotStudent.Data.csproj" />
   <Project Path="ChatbotStudent/ChatbotStudent.csproj" />
 </Solution>

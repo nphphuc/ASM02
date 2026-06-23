@@ -1,22 +1,20 @@
-using ChatbotStudent.Data;
-using ChatbotStudent.Models;
-using ChatbotStudent.Services;
+using ChatbotStudent.Data.Models;
+using ChatbotStudent.Business.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 
-namespace ChatbotStudent.Pages.Research;
+namespace ChatbotStudent.Web.Pages.Research;
 
 [Authorize(Roles = "Admin,Lecturer")]
 public class IndexModel : PageModel
 {
-    private readonly AppDbContext _db;
+    private readonly ICourseService _courseService;
     private readonly IBenchmarkService _benchmark;
 
-    public IndexModel(AppDbContext db, IBenchmarkService benchmark)
+    public IndexModel(ICourseService courseService, IBenchmarkService benchmark)
     {
-        _db = db;
+        _courseService = courseService;
         _benchmark = benchmark;
     }
 
@@ -27,7 +25,7 @@ public class IndexModel : PageModel
 
     public async Task OnGetAsync(int? courseId = null)
     {
-        Courses = await _db.Courses.ToListAsync();
+        Courses = await _courseService.GetAllCoursesAsync();
 
         if (courseId.HasValue)
         {

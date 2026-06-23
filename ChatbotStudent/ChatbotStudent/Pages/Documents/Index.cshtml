@@ -1,5 +1,5 @@
 @page
-@model ChatbotStudent.Pages.Documents.IndexModel
+@model ChatbotStudent.Web.Pages.Documents.IndexModel
 @{
     ViewData["Title"] = "Quản lý tài liệu";
 }
@@ -25,7 +25,7 @@
         </div>
         <div class="col-md-4">
             <div class="stat-card card green">
-                <div class="stat-value text-success">@Model.Documents.Count(d => d.Status == ChatbotStudent.Models.ProcessingStatus.Completed)</div>
+                <div class="stat-value text-success">@Model.Documents.Count(d => d.Status == ChatbotStudent.Data.Models.ProcessingStatus.Completed)</div>
                 <div class="stat-label">Đã xử lý</div>
             </div>
         </div>
@@ -216,19 +216,19 @@
 </div>
 
 @functions {
-    string GetFileIcon(ChatbotStudent.Models.DocumentType type) => type switch
+    string GetFileIcon(ChatbotStudent.Data.Models.DocumentType type) => type switch
     {
-        ChatbotStudent.Models.DocumentType.PDF => "bi-file-earmark-pdf text-danger",
-        ChatbotStudent.Models.DocumentType.DOCX => "bi-file-earmark-word text-primary",
-        ChatbotStudent.Models.DocumentType.PPTX => "bi-file-earmark-slides text-warning",
+        ChatbotStudent.Data.Models.DocumentType.PDF => "bi-file-earmark-pdf text-danger",
+        ChatbotStudent.Data.Models.DocumentType.DOCX => "bi-file-earmark-word text-primary",
+        ChatbotStudent.Data.Models.DocumentType.PPTX => "bi-file-earmark-slides text-warning",
         _ => "bi-file-earmark"
     };
 
-    string GetStatusText(ChatbotStudent.Models.ProcessingStatus status) => status switch
+    string GetStatusText(ChatbotStudent.Data.Models.ProcessingStatus status) => status switch
     {
-        ChatbotStudent.Models.ProcessingStatus.Completed => "✓ Hoàn thành",
-        ChatbotStudent.Models.ProcessingStatus.Processing => "⏳ Đang xử lý",
-        ChatbotStudent.Models.ProcessingStatus.Failed => "✕ Thất bại",
+        ChatbotStudent.Data.Models.ProcessingStatus.Completed => "✓ Hoàn thành",
+        ChatbotStudent.Data.Models.ProcessingStatus.Processing => "⏳ Đang xử lý",
+        ChatbotStudent.Data.Models.ProcessingStatus.Failed => "✕ Thất bại",
         _ => "⏳ Chờ xử lý"
     };
 }

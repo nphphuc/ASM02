@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using ChatbotStudent.Models;
+using ChatbotStudent.Data.Models;
 
-namespace ChatbotStudent.Pages.Auth;
+namespace ChatbotStudent.Web.Pages.Auth;
 
 public class LoginModel : PageModel
 {
@@ -60,13 +60,13 @@ public class LoginModel : PageModel
         }
 
         // Check approval status
-        if (user.ApprovalStatus == ChatbotStudent.Models.ApprovalStatus.Pending)
+        if (user.ApprovalStatus == Data.Models.ApprovalStatus.Pending)
         {
             ErrorMessage = "Tài khoản của bạn đang chờ admin duyệt. Vui lòng quay lại sau.";
             return Page();
         }
 
-        if (user.ApprovalStatus == ChatbotStudent.Models.ApprovalStatus.Rejected)
+        if (user.ApprovalStatus == Data.Models.ApprovalStatus.Rejected)
         {
             var reason = !string.IsNullOrEmpty(user.RejectionReason)
                 ? $" Lý do: {user.RejectionReason}"

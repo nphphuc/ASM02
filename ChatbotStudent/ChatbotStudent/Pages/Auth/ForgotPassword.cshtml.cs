@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using ChatbotStudent.Services;
+using ChatbotStudent.Business.Services;
 
-namespace ChatbotStudent.Pages.Auth;
+namespace ChatbotStudent.Web.Pages.Auth;
 
 public class ForgotPasswordModel : PageModel
 {
